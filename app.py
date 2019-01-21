@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, logging, request
+from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 #from data import Articles
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
@@ -17,8 +17,6 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MySQL
 mysql = MySQL(app)
 
-#myarticles = Articles()
-
 
 # Register Form Class
 class RegisterForm(Form):
@@ -36,7 +34,6 @@ class ArticleForm(Form):
     title = StringField('Title', [validators.Length(min=1, max=200)])
     body = TextAreaField('Body', [validators.Length(min=30)])
 
-
 # Home/Index
 @app.route("/")
 def home():
@@ -47,7 +44,7 @@ def home():
 def about():
     return render_template('about.html')
 
-# Articles
+# Catalog
 @app.route("/catalog")
 def catalog():
     # Create cursor
@@ -55,17 +52,17 @@ def catalog():
 
     # Get articles
     result = c.execute("""
-        SELECT * 
-        FROM articles;
+        SELECT *
+        FROM categories;
     """)
 
-    articles = c.fetchall()
+    catalog = c.fetchall()
 
     if result > 0:
-        return render_template('articles.html', articles=articles)
+        return render_template('catalog.html', catalog=catalog)
     else:
-        msg = 'No Articles Found'
-        return render_template('articles.html', msg=msg)
+        msg = 'No Items Found'
+        return render_template('catalog.html', msg=msg)
 
     # Close connection
     c.close()

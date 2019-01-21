@@ -1,9 +1,26 @@
 {% extends 'layout.html' %}
 {% block body %}
-    <h1>Articles</h1>
-    <ul class="list-group">
-        {% for article in articles %}
-            <li class="list-group-item"><a href="articles/{{article.id}}">{{ article.title }}</a></li>
-        {% endfor %}
-    </ul>
+    <h1>Our Catalog</h1><br />
+    <table>
+      <tr>
+        <td>
+            {% if session.logged_in %}
+                <a href="/add_item" class="btn btn-primary">Add Item</a>
+            {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>
+            <h5><i class="fas fa-tags"></i>&nbsp;Categories</h5>
+            <ul class="list-group">
+                {% for item in catalog %}
+                    <li class="list-group-item">{{ item.category_name }}</li>
+                {% endfor %}
+            </ul>
+        </td>
+
+      </tr>
+    </table>
 {% endblock body %}
+
+<!--  <li class="list-group-item"><a href="catalog/{{ catalog.category_name }}">{{ catalog.category_name }}</a></li> -->>

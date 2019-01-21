@@ -1,4 +1,38 @@
+body {
+    background-color: #f9fbff;
+    color: #1c3c7c;
+    font-family: 'Montserrat', sans-serif;
+}
+
 .snowman {
     color: #fff;
     font-size: 3em;
+}
+
+.my-container {
+    background-color: #becbe0;
+    padding: 40px;
+    margin-top: 40px;
+}
+
+.my-nav {
+    background-color: #6f90c6;
+    color: #fff;
+}
+
+.navbar-brand {
+    color: #fff;
+}
+
+.navbar-brand:hover {
+    color: #1c3c7c;
+}
+
+.nav-item {
+    color: #1c3c7c;
+    padding: 0;
+}
+
+.nav-item:hover {
+    color: #fff;
 }

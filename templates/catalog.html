@@ -14,7 +14,9 @@
             <h5><i class="fas fa-tags"></i>&nbsp;Categories</h5>
             <ul class="list-group">
                 {% for item in catalog %}
-                    <li class="list-group-item">{{ item.category_name }}</li>
+                    <li class="list-group-item">
+                        <a href="#">{{ item.category_name }}</a>
+                    </li>
                 {% endfor %}
             </ul>
         </td>

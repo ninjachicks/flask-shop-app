@@ -20,9 +20,17 @@
                 {% endfor %}
             </ul>
         </td>
+        <td>
+            <h5>Latest Items</h5>
+            <ul class="list-group">
+                {% for item in latestitems %}
+                    <li class="list-group-item">
+                        <a href="#">{{ latestitems.item_name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </td>
 
       </tr>
     </table>
 {% endblock body %}
-
-<!--  <li class="list-group-item"><a href="catalog/{{ catalog.category_name }}">{{ catalog.category_name }}</a></li> -->>

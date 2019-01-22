@@ -1,9 +1,21 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
-#from data import Articles
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 from functools import wraps
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Categories, Items, Users
+
+# Creating DB Engine
+engine = create_engine('sqlite:///flaskshop.db')
+# Bind the engine to the metadata of the Base class
+Base.metadata.bind = engine
+# Declaring sessionmaker
+DBSession = sessionmaker(bind=engine)
+# DBSession() instance
+session = DBSession()
 
 
 app = Flask(__name__)
@@ -39,10 +51,12 @@ class ArticleForm(Form):
 def home():
     return render_template('home.html')
 
+
 # About
 @app.route("/about")
 def about():
     return render_template('about.html')
+
 
 # Catalog
 @app.route("/catalog")
@@ -57,15 +71,28 @@ def catalog():
     """)
 
     catalog = c.fetchall()
+    print(catalog)
+
+    # Get latest items
+    itemlist = c.execute("""
+        SELECT * 
+        FROM items
+        ORDER BY creation_time desc 
+        LIMIT 10;
+    """)
+
+    latestitems = c.fetchall()
+    print(latestitems)
 
     if result > 0:
-        return render_template('catalog.html', catalog=catalog)
+        return render_template('catalog.html', catalog=catalog, latestitems=latestitems)
     else:
         msg = 'No Items Found'
         return render_template('catalog.html', msg=msg)
 
     # Close connection
     c.close()
+
 
 # Single Article
 @app.route("/articles/<string:id>/")

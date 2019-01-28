@@ -4,7 +4,7 @@ from flask import Flask, render_template, flash, redirect, url_for, session, log
 from flask_mysqldb import MySQL
 from functools import wraps
 from passlib.hash import sha256_crypt
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 
@@ -171,6 +171,8 @@ def add_category():
         db_session = DBSession()      
 
         # Insert into DB
+        # categories = Categories()
+        # categories.insert().values(name)
         db_session.execute("""
             INSERT INTO categories(name)
             VALUES('%s')""" %name)

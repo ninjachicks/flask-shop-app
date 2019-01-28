@@ -32,10 +32,14 @@ class RegisterForm(Form):
     ])
     confirm = PasswordField('Confirm Password')
 
+# Category Form Class
+class CategoryForm(Form):
+    name = StringField('Name', [validators.Length(min=1, max=200)])
+
 # Article Form Class
 class ArticleForm(Form):
-    title = StringField('Title', [validators.Length(min=1, max=200)])
-    body = TextAreaField('Body', [validators.Length(min=30)])
+    title = StringField('Name', [validators.Length(min=1, max=200)])
+    body = TextAreaField('Detail', [validators.Length(min=30)])
 
 # Home/Index
 @app.route("/")
@@ -151,6 +155,32 @@ def logout():
     session.clear()
     flash('You are now logged out', 'success')
     return redirect(url_for('login'))
+
+# Add Category
+@app.route('/add_category', methods=['GET', 'POST'])
+@is_logged_in
+def add_category():
+    form = CategoryForm(request.form)
+    if request.method == 'POST' and form.validate():
+        # Get Form Values
+        name = form.name.data
+
+        # Open DB Session
+        db_session = DBSession()      
+
+        # Execute
+        db_session.execute("""
+            INSERT INTO categories(name)
+            VALUES(%s)
+        """, (name))
+
+        # Commit to DB
+        db_session.commit()
+
+        flash('Article created', 'success')
+
+        return redirect(url_for('catalog'))
+    return render_template('add_category.html', form=form)
 
 
 # Add Item

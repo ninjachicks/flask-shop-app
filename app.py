@@ -165,15 +165,15 @@ def add_category():
     if request.method == 'POST' and form.validate():
         # Get Form Values
         name = form.name.data
+        print(name)
 
         # Open DB Session
         db_session = DBSession()      
 
-        # Execute
+        # Insert into DB
         db_session.execute("""
             INSERT INTO categories(name)
-            VALUES(%s)
-        """, (name))
+            VALUES('%s')""" %name)
 
         # Commit to DB
         db_session.commit()

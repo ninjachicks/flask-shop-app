@@ -36,10 +36,11 @@ class RegisterForm(Form):
 class CategoryForm(Form):
     name = StringField('Name', [validators.Length(min=1, max=200)])
 
-# Article Form Class
-class ArticleForm(Form):
-    title = StringField('Name', [validators.Length(min=1, max=200)])
-    body = TextAreaField('Detail', [validators.Length(min=30)])
+# Item Form Class
+class ItemForm(Form):
+    name = StringField('Name', [validators.Length(min=1, max=200)])
+    detail = TextAreaField('Detail', [validators.Length(min=30)])
+    category = TextAreaField('Category', [validators.Length(min=20)])
 
 # Home/Index
 @app.route("/")
@@ -187,7 +188,7 @@ def add_category():
 @app.route('/add_item', methods=['GET', 'POST'])
 @is_logged_in
 def add_item():
-    form = ArticleForm(request.form)
+    form = ItemForm(request.form)
     if request.method == 'POST' and form.validate():
         # Get Form Values
         name = form.name.data

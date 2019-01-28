@@ -152,59 +152,34 @@ def logout():
     flash('You are now logged out', 'success')
     return redirect(url_for('login'))
 
-# Dashboard
-# @app.route('/dashboard')
-# @is_logged_in
-# def dashboard():
-#     # Create cursor
-#     #c = mysql.connection.cursor()
 
-#     # Get articles
-#     result = c.execute("""
-#         SELECT * 
-#         FROM articles;
-#     """)
+# Add Item
+@app.route('/add_item', methods=['GET', 'POST'])
+@is_logged_in
+def add_item():
+    form = ArticleForm(request.form)
+    if request.method == 'POST' and form.validate():
+        # Get Form Values
+        name = form.name.data
+        detail = form.detail.data
+        category = form.category.data
 
-#     articles = c.fetchall()
+        # Open DB Session
+        db_session = DBSession()      
 
-#     if result > 0:
-#         return render_template('dashboard.html', articles=articles)
-#     else:
-#         msg = 'No Articles Found'
-#         return render_template('dashboard.html', msg=msg)
+        # Execute
+        db_session.execute("""
+            INSERT INTO items(name, detail, category)
+            VALUES(%s, %s, %s)
+        """, (name, detail, category))
 
-#     # Close connection
-#     c.close()
-    
+        # Commit to DB
+        db_session.commit()
 
-# Add Article
-# @app.route('/add_article', methods=['GET', 'POST'])
-# @is_logged_in
-# def add_article():
-#     form = ArticleForm(request.form)
-#     if request.method == 'POST' and form.validate():
-#         title = form.title.data
-#         body = form.body.data
+        flash('Article created', 'success')
 
-#         # Create Cursor
-#         c = mysql.connection.cursor()
-
-#         # Execute
-#         c.execute("""
-#             INSERT INTO articles(title, body, author)
-#             VALUES(%s, %s, %s)
-#         """, (title, body, session['username']))
-
-#         # Commit to DB
-#         mysql.connection.commit()
-
-#         # Close connection
-#         c.close()
-
-#         flash('Article created', 'success')
-
-#         return redirect(url_for('dashboard'))
-#     return render_template('add_article.html', form=form)
+        return redirect(url_for('catalog'))
+    return render_template('add_item.html', form=form)
 
 
 # # Edit Article

@@ -171,11 +171,8 @@ def add_category():
         db_session = DBSession()      
 
         # Insert into DB
-        # categories = Categories()
-        # categories.insert().values(name)
-        db_session.execute("""
-            INSERT INTO categories(name)
-            VALUES('%s')""" %name)
+        newcategory = Categories(name=name)
+        db_session.add(newcategory)
 
         # Commit to DB
         db_session.commit()

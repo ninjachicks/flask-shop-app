@@ -41,6 +41,10 @@ body {
     width: 50%;
 }
 
+.list-group-item {
+    padding: 0;
+}
+
 .catalog-list {
     background-color: #d0dbed;
 }
@@ -48,6 +52,7 @@ body {
 .btn-catalog {
     background-color: #6f90c6;
     border-radius: 2px;
+    margin-left: 10px;
 }
 
 .btn-catalog:hover {
@@ -88,4 +93,33 @@ body {
 .width-max {
     width: 100%;
     text-align: right;
+}
+
+.btn-cat-additem {
+    border-radius: 2px;
+    background-color: #6f90c6;
+    margin: 20px 0;
+    color: #fff;
+}
+
+.btn-submit {
+    border-radius: 2px;
+    background-color: #4ec4c4;
+    color: #fff;
+}
+
+.td1-catalog {
+    width: 70%;
+    background-color: #d0dbed;
+    margin: 0;
+    padding: 0;
+    border-style: none;
+}
+
+.td2-catalog {
+    width: 15%;
+    background-color: #d0dbed;
+    margin: 0;
+    padding: 0;
+    border-style: none;
 }

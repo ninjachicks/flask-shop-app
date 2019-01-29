@@ -42,7 +42,7 @@ body {
 }
 
 .catalog-list {
-    background-color: #e1e9f7;
+    background-color: #d0dbed;
 }
 
 .btn-catalog {
@@ -56,6 +56,25 @@ body {
 
 .h5-catalog {
     margin: 20px 0;
+}
+
+.a-cat-catalog {
+    color: #1c3c7c;
+}
+
+.a-cat-catalog:hover {
+    color: #6f90c6;
+    text-decoration: none;
+}
+
+.btn-edit {
+    border-radius: 2px;
+    background-color: #6f90c6;
+}
+
+.btn-delete {
+    border-radius: 2px;
+    background-color: #f44271;
 }
 
 .width-max {

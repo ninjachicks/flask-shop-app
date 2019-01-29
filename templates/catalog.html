@@ -16,11 +16,11 @@
             <ul class="list-group">
             {% for cat in catalog %}
                 <li class="list-group-item catalog-list">
-                    <a href="#">{{ cat.name }}</a>
-                    <a href="edit_cat/{{cat.id}}" class="btn btn-default pull-right">Edit</a>
+                    <a class="a-cat-catalog" href="#">{{ cat.name }}</a>
+                    <a href="edit_cat/{{cat.id}}" class="btn btn-edit pull-right">Edit</a>
                     <form action={{ url_for('delete_cat', id=cat.id) }} method='post'>
                         <input type="hidden" name="_method" value="DELETE">
-                        <input type="submit" value="Delete" class="btn btn-danger">
+                        <input type="submit" value="Delete" class="btn btn-delete">
                     </form>
                 </li>
             {% endfor %}

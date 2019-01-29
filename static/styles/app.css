@@ -72,9 +72,17 @@ body {
     background-color: #6f90c6;
 }
 
+.btn-edit:hover {
+    color: #fff;
+}
+
 .btn-delete {
     border-radius: 2px;
     background-color: #f44271;
+}
+
+.btn-delete:hover {
+    color: #fff;
 }
 
 .width-max {

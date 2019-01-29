@@ -1,33 +1,48 @@
 {% extends 'layout.html' %}
 {% block body %}
     <h1>Our Catalog</h1><br />
-    <table>
+    <div class="width-max">
+    {% if session.logged_in %}
+        <a href="/add_category" class="btn btn-catalog">Add Category</a>
+        <a href="/add_item" class="btn btn-catalog">Add Item</a>
+        <br />
+        <br />
+    {% endif %}
+    </div>
+    <table class="table table-striped">
       <tr>
-        <td>
-            {% if session.logged_in %}
-                <a href="/add_category" class="btn btn-primary">Add Category</a>
-                <a href="/add_item" class="btn btn-primary">Add Item</a>
-                <br />
-            {% endif %}
-        </td>
-      </tr>
-      <tr>
-        <td>
-            <h5><i class="fas fa-tags"></i>&nbsp;Categories</h5>
+        <td class="table-catalog">
+            <h5 class="h5-catalog"><i class="fas fa-tags"></i>&nbsp;Categories</h5>
             <ul class="list-group">
-                {% for item in catalog %}
-                    <li class="list-group-item">
-                        <a href="#">{{ item.name }}</a>
-                    </li>
-                {% endfor %}
+            {% for cat in catalog %}
+                <li class="list-group-item catalog-list">
+                    <a href="#">{{ cat.name }}</a>
+                    <a href="edit_cat/{{cat.id}}" class="btn btn-default pull-right">Edit</a>
+                    <form action={{ url_for('delete_cat', id=cat.id) }} method='post'>
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="submit" value="Delete" class="btn btn-danger">
+                    </form>
+                </li>
+            {% endfor %}
             </ul>
         </td>
-        <td>
-            <h5>Latest Items</h5>
+        <td class="table-catalog">
+            <h5 class="h5-catalog">Latest Items</h5>
             <ul class="list-group">
-                {% for item in latestitems %}
+                {% for item in latestitem %}
                     <li class="list-group-item">
-                        <a href="#">{{ latestitems.name }}</a>
+                        <table class="table table-striped">
+                            <tr>
+                                <td>{{ latestitem.name }}</td>
+                                <td><a href="edit_item/{{item.id}}" class="btn btn-default pull-right">Edit</a></td>
+                                <td>
+                                    <form action={{ url_for('delete_item', id=item.id) }} method='post'>
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="submit" value="Delete" class="btn btn-danger">
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
                     </li>
                 {% endfor %}
             </ul>

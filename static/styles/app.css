@@ -1,5 +1,5 @@
 body {
-    background-color: #e1e9f7;/* #f9fbff; */
+    background-color: #e1e9f7;
     color: #1c3c7c;
     font-family: 'Montserrat', sans-serif;
 }
@@ -35,4 +35,30 @@ body {
 
 .nav-item:hover {
     color: #fff;
+}
+
+.table-catalog {
+    width: 50%;
+}
+
+.catalog-list {
+    background-color: #e1e9f7;
+}
+
+.btn-catalog {
+    background-color: #6f90c6;
+    border-radius: 2px;
+}
+
+.btn-catalog:hover {
+    color: #fff;
+}
+
+.h5-catalog {
+    margin: 20px 0;
+}
+
+.width-max {
+    width: 100%;
+    text-align: right;
 }

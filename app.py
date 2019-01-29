@@ -42,6 +42,28 @@ class ItemForm(Form):
     detail = TextAreaField('Detail', [validators.Length(min=30)])
     category = TextAreaField('Category', [validators.Length(min=20)])
 
+
+# Check if user logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Unauthorized, please log in', 'danger')
+            return redirect(url_for('login'))
+    return wrap
+
+
+# Logout
+@app.route('/logout')
+@is_logged_in
+def logout():
+    session.clear()
+    flash('You are now logged out', 'success')
+    return redirect(url_for('login'))
+
+
 # Home/Index
 @app.route("/")
 def home():
@@ -65,10 +87,23 @@ def catalog():
     
     latestitems = db_session.query(Items.name).order_by(Items.creation_time.desc())
 
-    print(catalog)
-    print(latestitems)
     # Ausgabe von 2 Variablen für Template "catalog"
     return render_template('catalog.html', catalog=catalog, latestitems=latestitems)
+
+
+# Single Category
+@app.route("/category/<string:name>")
+def category(name):
+
+    # DBSession() instance
+    db_session = DBSession()
+
+    catalog = db_session.query(Categories.name).filter(Categories.name==name)
+
+    category = db_session.query(Items.name).filter(Items.category==name)
+
+    # Ausgabe von Variable für Template "category"
+    return render_template('category.html', category=category, catalog=catalog)
 
 
 # Single Article
@@ -120,6 +155,7 @@ def login():
         username = request.form['username']
         password_post = request.form['password']
 
+        # Creating DB Session
         db_session = DBSession()
         user = db_session.query(Users).filter(Users.username==username).first()
 
@@ -138,24 +174,6 @@ def login():
     else:
         return render_template('login.html')
 
-# Check if user logged in
-def is_logged_in(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            flash('Unauthorized, please log in', 'danger')
-            return redirect(url_for('login'))
-    return wrap
-
-# Logout
-@app.route('/logout')
-@is_logged_in
-def logout():
-    session.clear()
-    flash('You are now logged out', 'success')
-    return redirect(url_for('login'))
 
 # Add Category
 @app.route('/add_category', methods=['GET', 'POST'])
@@ -177,10 +195,63 @@ def add_category():
         # Commit to DB
         db_session.commit()
 
-        flash('Article created', 'success')
+        flash('Category created', 'success')
 
         return redirect(url_for('catalog'))
     return render_template('add_category.html', form=form)
+
+
+# Delete Category
+@app.route('/delete_cat/<string:id>', methods=['POST'])
+@is_logged_in
+def delete_cat(id):
+
+    # Open DB Session
+    db_session = DBSession()      
+
+    # Delete Category
+    delcategory = Categories(id=id)
+    db_session.delete(delcategory)
+
+    # Commit to DB
+    db_session.commit()
+
+    flash('Category deleted', 'success')
+
+    return redirect(url_for('catalog'))
+
+# Edit Category
+@app.route('/edit_cat/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def edit_cat(id):
+
+    # Creating DB Session
+    db_session = DBSession()
+
+    category = db_session.query(Categories).filter(Categories.id==id).first()
+
+    # Get Form
+    form = CategoryForm(request.form)
+
+    # Populate category form fields
+    form.name.data = category['name']
+
+    if request.method == 'POST' and form.validate():
+        name = request.form['name']
+
+        app.logger.info(name)
+
+        # Edit Category
+        editcategory = Categories(name=name)
+        db_session.update(editcategory)
+
+        # Commit to DB
+        db_session.commit()
+
+        flash('Category updated', 'success')
+
+        return redirect(url_for('catalog'))
+    return render_template('edit_cat.html', form=form)
 
 
 # Add Item
@@ -211,84 +282,61 @@ def add_item():
         return redirect(url_for('catalog'))
     return render_template('add_item.html', form=form)
 
+# Delete Item
+@app.route('/delete_item/<string:id>', methods=['POST'])
+@is_logged_in
+def delete_item(id):
 
-# # Edit Article
-# @app.route('/edit_article/<string:id>', methods=['GET', 'POST'])
-# @is_logged_in
-# def edit_article(id):
-#     # Create Cursor
-#     c = mysql.connection.cursor()
+    # Open DB Session
+    db_session = DBSession()      
 
-#     # Get article by id
-#     result = c.execute("""
-#         SELECT * 
-#         FROM articles
-#         WHERE id = %s
-#     """, [id])
+    # Delete Item
+    delitem = Items(id=id)
+    db_session.delete(delitem)
 
-#     article = c.fetchone()
+    # Commit to DB
+    db_session.commit()
 
-#     # Close Connection
-#     c.close()
+    flash('Item deleted', 'success')
 
-#     # Get Form
-#     form = ArticleForm(request.form)
+    return redirect(url_for('catalog'))
 
-#     # Populate article form fields
-#     form.title.data = article['title']
-#     form.body.data = article['body']
+# Edit Item
+@app.route('/edit_item/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def edit_item(id):
 
-#     if request.method == 'POST' and form.validate():
-#         title = request.form['title']
-#         body = request.form['body']
+    # Creating DB Session
+    db_session = DBSession()
 
-#         # Create Cursor
-#         c = mysql.connection.cursor()
-#         app.logger.info(title)
+    item = db_session.query(Items).filter(Items.id==id).first()
 
-#         # Execute
-#         c.execute("""
-#             UPDATE articles
-#             SET title = %s, body = %s
-#             WHERE id = %s
-#         """, (title, body, id))
+    # Get Form
+    form = ItemForm(request.form)
 
-#         # Commit to DB
-#         mysql.connection.commit()
+    # Populate item form fields
+    form.name.data = item['name']
+    form.detail.data = item['detail']
+    form.category.data = item['category']
 
-#         # Close connection
-#         c.close()
+    if request.method == 'POST' and form.validate():
+        name = request.form['name']
+        detail = request.form['detail']
+        category = request.form['id']
 
-#         flash('Article updated', 'success')
+        app.logger.info(name)
 
-#         return redirect(url_for('dashboard'))
-#     return render_template('edit_article.html', form=form)
+        # Edit Item
+        edititem= Items(name=name, detail=detail, category=category)
+        db_session.update(edititem)
 
+        # Commit to DB
+        db_session.commit()
 
-# # Delete Article
-# @app.route('/delete_article/<string:id>', methods=['POST'])
-# @is_logged_in
-# def delete_article(id):
+        flash('Item updated', 'success')
 
-#     # Create Cursor
-#     c = mysql.connection.cursor()
-
-#     # Execute
-#     c.execute("""
-#         DELETE
-#         FROM articles
-#         WHERE id = %s
-#     """, [id])
-
-#     # Commit to DB
-#     mysql.connection.commit()
-
-#     # Close Connection
-#     c.close()
-
-#     flash('Article deleted', 'success')
-
-#     return redirect(url_for('dashboard'))
+        return redirect(url_for('catalog'))
+    return render_template('edit_item.html', form=form)
 
 
 if __name__ == "__main__":

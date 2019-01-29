@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+    {% for cat in catalog %}
+        <h1>{{ cat.name }}</h1>
+        <hr>
+        <div>
+            <ul class="list-group">
+                <li class="list-group-item catalog-list">
+                    <table class="table-responsive">
+                        <tr>
+                        {% for item in category %}
+                            <td class="td1-catalog">{{ item.name }}</td>
+                            {% if session.logged_in %}
+                            <td class="td2-catalog"><a href="edit_item/{{item.id}}" class="btn btn-edit pull-right">Edit</a></td>
+                            <td class="td2-catalog">
+                                <form action={{ url_for('delete_item', id=item.id) }} method='post'>
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="submit" value="Delete" class="btn btn-delete">
+                                </form>
+                            </td>
+                            {% endif %}
+                        {% endfor %}
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+    {% endfor %}
+    
+{% endblock body %}

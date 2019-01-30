@@ -83,7 +83,7 @@ def catalog():
     # DBSession() instance
     db_session = DBSession()
 
-    catalog = db_session.query(Categories.name)
+    catalog = db_session.query(Categories)
     
     latestitems = db_session.query(Items.name).order_by(Items.creation_time.desc())
 
@@ -180,18 +180,15 @@ def login():
 @is_logged_in
 def add_category():
     form = CategoryForm(request.form)
+
     if request.method == 'POST' and form.validate():
         # Get Form Values
         name = form.name.data
-        print(name)
-
         # Open DB Session
         db_session = DBSession()      
-
         # Insert into DB
         newcategory = Categories(name=name)
         db_session.add(newcategory)
-
         # Commit to DB
         db_session.commit()
 
@@ -207,18 +204,18 @@ def add_category():
 def delete_cat(id):
 
     # Open DB Session
-    db_session = DBSession()      
-
+    db_session = DBSession()     
+    # Fetch Category from DB
+    result = db_session.query(Categories).filter(Categories.id==id).first()
     # Delete Category
-    delcategory = Categories(id=id)
-    db_session.delete(delcategory)
-
+    db_session.delete(result)
     # Commit to DB
     db_session.commit()
 
     flash('Category deleted', 'success')
 
     return redirect(url_for('catalog'))
+
 
 # Edit Category
 @app.route('/edit_cat/<string:id>', methods=['GET', 'POST'])
@@ -227,23 +224,21 @@ def edit_cat(id):
 
     # Creating DB Session
     db_session = DBSession()
-
+    # Fetch Category from DB
     category = db_session.query(Categories).filter(Categories.id==id).first()
 
     # Get Form
     form = CategoryForm(request.form)
-
     # Populate category form fields
-    form.name.data = category['name']
+    form.name.data = category.name
 
     if request.method == 'POST' and form.validate():
-        name = request.form['name']
+        newname = request.form['name']
 
-        app.logger.info(name)
+        app.logger.info(newname)
 
         # Edit Category
-        editcategory = Categories(name=name)
-        db_session.update(editcategory)
+        category.name = newname
 
         # Commit to DB
         db_session.commit()

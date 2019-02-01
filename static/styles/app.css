@@ -123,3 +123,7 @@ body {
     padding: 0;
     border-style: none;
 }
+
+.select {
+    margin: 60px 0 20px 0;
+}

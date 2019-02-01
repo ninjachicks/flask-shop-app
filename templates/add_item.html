@@ -4,16 +4,10 @@
   <h1>Add Item</h1>
   {% from "includes/_formhelper.html" import render_field %}
   <form method="POST" action="">
-
-    <div class="dropdown">
-      <button class="btn btn-cat-additem dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Select Category
-      </button>
-      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <a class="dropdown-item" href="#">Action</a>
-        <a class="dropdown-item" href="#">Another action</a>
-        <a class="dropdown-item" href="#">Something else here</a>
-      </div>
+ 
+    <br />
+    <div class="form-group">
+      {{ render_field(form.category, class_="form-control") }}
     </div>
 
     <div class="form-group">
@@ -24,7 +18,7 @@
       {{ render_field(form.detail, class_="form-control", id="editor") }}
     </div>
     
-    <p><input class="btn btn-submit type="submit" value="Submit">
+    <input class="btn btn-submit" type="submit" value="Submit">
   </form>
 
 {% endblock body %}

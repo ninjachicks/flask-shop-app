@@ -37,22 +37,24 @@
         <td class="table-catalog">
             <h5 class="h5-catalog">Latest Items</h5>
             <ul class="list-group">
-                {% for item in latestitem %}
-                    <li class="list-group-item">
-                        <table class="table">
-                            <tr>
-                                <td>{{ latestitem.name }}</td>
-                                <td><a href="edit_item/{{item.id}}" class="btn btn-default pull-right">Edit</a></td>
-                                <td>
-                                    <form action={{ url_for('delete_item', id=item.id) }} method='post'>
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <input type="submit" value="Delete" class="btn btn-danger">
-                                    </form>
-                                </td>
-                            </tr>
-                        </table>
-                    </li>
-                {% endfor %}
+            {% for item in latestitems %}
+                <li class="list-group-item catalog-list">
+                    <table class="table-responsive">
+                        <tr>
+                            <td class="td1-catalog"><a class="a-cat-catalog" href="category/{{item.category}}/{{item.name}}">{{ item.name }}</a></td>
+                            {% if session.logged_in %}
+                            <td class="td2-catalog"><a href="edit_item/{{item.id}}" class="btn btn-edit pull-right">Edit</a></td>
+                            <td class="td2-catalog">
+                                <form action={{ url_for('delete_item', id=item.id) }} method='post'>
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="submit" value="Delete" class="btn btn-delete">
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    </table>
+                </li>
+            {% endfor %}
             </ul>
         </td>
 

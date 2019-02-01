@@ -6,7 +6,7 @@ from functools import wraps
 from passlib.hash import sha256_crypt
 from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, SelectField, validators
 
 from database_setup import Categories, Items, Users, Base
 
@@ -39,8 +39,8 @@ class CategoryForm(Form):
 # Item Form Class
 class ItemForm(Form):
     name = StringField('Name', [validators.Length(min=1, max=200)])
-    detail = TextAreaField('Detail', [validators.Length(min=30)])
-    category = TextAreaField('Category', [validators.Length(min=20)])
+    detail = TextAreaField('Detail', [validators.Length(min=3)])
+    category = SelectField('Category', [validators.DataRequired()])
 
 
 # Check if user logged in
@@ -85,9 +85,9 @@ def catalog():
 
     catalog = db_session.query(Categories)
     
-    latestitems = db_session.query(Items.name).order_by(Items.creation_time.desc())
+    latestitems = db_session.query(Items).order_by(Items.creation_time.desc())
 
-    # Ausgabe von 2 Variablen für Template "catalog"
+    # returns 2 variables for template 'catalog'
     return render_template('catalog.html', catalog=catalog, latestitems=latestitems)
 
 
@@ -102,7 +102,7 @@ def category(name):
 
     category = db_session.query(Items.name).filter(Items.category==name)
 
-    # Ausgabe von Variable für Template "category"
+    # returns 2 variables for template 'categories'
     return render_template('category.html', category=category, catalog=catalog)
 
 
@@ -239,7 +239,6 @@ def edit_cat(id):
 
         # Edit Category
         category.name = newname
-
         # Commit to DB
         db_session.commit()
 
@@ -250,24 +249,28 @@ def edit_cat(id):
 
 
 # Add Item
-@app.route('/add_item', methods=['GET', 'POST'])
+@app.route('/add_item', methods=['GET','POST'])
 @is_logged_in
 def add_item():
+
     form = ItemForm(request.form)
+    # DBSession() instance
+    db_session = DBSession()
+    # get categories for dropdown
+    categories = db_session.query(Categories)
+    #form = ItemForm(request.POST, obj=categories)
+    form.category.choices = [(c.name, c.name) for c in categories]
+
     if request.method == 'POST' and form.validate():
         # Get Form Values
         name = form.name.data
         detail = form.detail.data
         category = form.category.data
 
-        # Open DB Session
-        db_session = DBSession()      
-
-        # Execute
-        db_session.execute("""
-            INSERT INTO items(name, detail, category)
-            VALUES(%s, %s, %s)
-        """, (name, detail, category))
+        db_session = DBSession()    
+        # Insert into DB
+        newitem = Items(name=name, detail=detail, category=category)
+        db_session.add(newitem)    
 
         # Commit to DB
         db_session.commit()
@@ -275,7 +278,8 @@ def add_item():
         flash('Article created', 'success')
 
         return redirect(url_for('catalog'))
-    return render_template('add_item.html', form=form)
+
+    return render_template('add_item.html', form=form, categories=categories)
 
 # Delete Item
 @app.route('/delete_item/<string:id>', methods=['POST'])

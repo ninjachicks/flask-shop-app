@@ -83,7 +83,7 @@ def catalog():
     # DBSession() instance
     db_session = DBSession()
 
-    catalog = db_session.query(Categories)
+    catalog = db_session.query(Categories).order_by(Categories.name)
     
     latestitems = db_session.query(Items).order_by(Items.creation_time.desc())
 

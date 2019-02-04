@@ -18,7 +18,7 @@
                 <li class="list-group-item catalog-list">
                     <table class="table-responsive">
                         <tr>
-                            <td class="td1-catalog"><a class="a-cat-catalog" href="category/{{cat.name}}">{{ cat.name }}</a></td>
+                            <td class="td1-catalog"><a class="a-cat-catalog" href="{{cat.name}}">{{ cat.name }}</a></td>
                             {% if session.logged_in %}
                             <td class="td2-catalog"><a href="edit_cat/{{cat.id}}" class="btn btn-edit pull-right">Edit</a></td>
                             <td class="td2-catalog">
@@ -41,8 +41,8 @@
                 <li class="list-group-item catalog-list">
                     <table class="table-responsive">
                         <tr>
-                            <td class="td1-catalog"><a class="a-cat-catalog" href="category/{{item.category}}/{{item.name}}">{{ item.name }}</a>
-                            (<a class="a-cat-catalog" href="category/{{item.category}}">{{ item.category }}</a>)</td>
+                            <td class="td1-catalog"><a class="a-cat-catalog" href="{{item.category}}/{{item.name}}">{{ item.name }}</a>
+                            (<a class="a-cat-catalog" href="{{item.category}}">{{ item.category }}</a>)</td>
                             {% if session.logged_in %}
                             <td class="td2-catalog"><a href="edit_item/{{item.id}}" class="btn btn-edit pull-right">Edit</a></td>
                             <td class="td2-catalog">

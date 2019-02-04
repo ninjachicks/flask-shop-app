@@ -11,7 +11,7 @@
                     <table class="table-responsive">
                         <tr>
                         {% for item in category %}
-                            <td class="td1-catalog">{{ item.name }}</td>
+                            <td class="td1-catalog"><a class="a-cat-catalog" href="{{item.category}}/{{item.name}}">{{ item.name }}</a></td>
                         {% endfor %}
                         </tr>
                     </table>

@@ -92,7 +92,7 @@ def catalog():
 
 
 # Single Category
-@app.route("/category/<string:name>")
+@app.route("/<string:name>")
 def category(name):
 
     # DBSession() instance
@@ -100,7 +100,7 @@ def category(name):
 
     catalog = db_session.query(Categories.name).filter(Categories.name==name)
 
-    category = db_session.query(Items.name).filter(Items.category==name)
+    category = db_session.query(Items).filter(Items.category==name)
 
     countitems = db_session.query(Items).filter(Items.category==name).count()
 
@@ -108,22 +108,16 @@ def category(name):
     return render_template('category.html', category=category, catalog=catalog, countitems=countitems)
 
 
-# Single Article
-# @app.route("/articles/<string:id>/")
-# def article(id):
-#     # Create cursor
-#     #c = mysql.connection.cursor()
+# Single Item Page
+@app.route("/<string:category>/<string:name>/")
+def item(name, category):
+    
+    # DBSession() instance
+    db_session = DBSession()
 
-#     # Get article
-#     result = c.execute("""
-#         SELECT * 
-#         FROM articles
-#         WHERE id = %s;""", [id]
-#     )
+    singleitem = db_session.query(Items).filter(Items.name==name)
 
-#     article = c.fetchone()
-
-#     return render_template('article.html', article=article)
+    return render_template('item.html', singleitem=singleitem)
 
 # Register
 @app.route('/register', methods=['GET', 'POST'])
@@ -277,7 +271,7 @@ def add_item():
         # Commit to DB
         db_session.commit()
 
-        flash('Article created', 'success')
+        flash('Item created', 'success')
 
         return redirect(url_for('catalog'))
 

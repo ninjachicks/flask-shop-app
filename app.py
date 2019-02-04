@@ -102,8 +102,10 @@ def category(name):
 
     category = db_session.query(Items.name).filter(Items.category==name)
 
+    countitems = db_session.query(Items).filter(Items.category==name).count()
+
     # returns 2 variables for template 'categories'
-    return render_template('category.html', category=category, catalog=catalog)
+    return render_template('category.html', category=category, catalog=catalog, countitems=countitems)
 
 
 # Single Article

@@ -7,13 +7,19 @@
         <div>
             {{ entry.detail | safe }}
         </div>
-        {% if session.logged_in %}
-            <a href="{{ url_for('edit_item', id=entry.id) }}" class="btn btn-edit pull-right">Edit</a>
-            <form action={{ url_for('delete_item', id=entry.id) }} method='post'>
-                <input type="hidden" name="_method" value="DELETE">
-                <input type="submit" value="Delete" class="btn btn-delete">
-            </form>
-        {% endif %}
+        <div class="btn-inline">
+            {% if session.logged_in %}
+            <div class="btn-edit-inline">
+                <a href="{{ url_for('edit_item', id=entry.id) }}" class="btn btn-edit pull-right">Edit</a>
+            </div>
+            <div class="btn-del-inline">
+                <form action={{ url_for('delete_item', id=entry.id) }} method='post'>
+                    <input type="hidden" name="_method" value="DELETE">
+                    <input type="submit" value="Delete" class="btn btn-delete">
+                </form>
+            </div>
+            {% endif %}
+        </div>
 
     {% endfor %}
     

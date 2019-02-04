@@ -304,11 +304,15 @@ def edit_item(id):
     db_session = DBSession()
 
     item = db_session.query(Items).filter(Items.id==id).first()
+    categories = db_session.query(Categories)
 
     # Get Form
     form = ItemForm(request.form)
+    
     # Populate item form fields
-    form.category.choices = [(item.category, item.category)]
+    #form = ItemForm(request.POST, obj=categories)
+    form.category.choices = [(c.name, c.name) for c in categories]
+    #form.category.choices = [(item.category, item.category)]
     form.name.data = item.name
     form.detail.data = item.detail
 

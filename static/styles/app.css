@@ -127,3 +127,17 @@ body {
 .select {
     margin: 60px 0 20px 0;
 }
+
+.btn-inline {
+    display: flex;
+    align-content: flex-end;
+}
+
+.btn-edit-inline {
+    display: inline-block;
+}
+
+.btn-del-inline {
+    display: inline-block;
+    margin-left: 20px;
+}

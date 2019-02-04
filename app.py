@@ -288,11 +288,10 @@ def delete_item(id):
 
     # Open DB Session
     db_session = DBSession()      
-
+    # Fetch Category from DB
+    delitem = db_session.query(Items).filter(Items.id==id).first()
     # Delete Item
-    delitem = Items(id=id)
     db_session.delete(delitem)
-
     # Commit to DB
     db_session.commit()
 
@@ -312,23 +311,22 @@ def edit_item(id):
 
     # Get Form
     form = ItemForm(request.form)
-
     # Populate item form fields
-    form.name.data = item['name']
-    form.detail.data = item['detail']
-    form.category.data = item['category']
+    form.category.choices = [(item.category, item.category)]
+    form.name.data = item.name
+    form.detail.data = item.detail
 
     if request.method == 'POST' and form.validate():
-        name = request.form['name']
-        detail = request.form['detail']
-        category = request.form['id']
+        newcategory = request.form['category']
+        newname = request.form['name']
+        newdetail = request.form['detail']
 
-        app.logger.info(name)
+        app.logger.info(newcategory, newname, newdetail)
 
-        # Edit Item
-        edititem= Items(name=name, detail=detail, category=category)
-        db_session.update(edititem)
-
+        # Edit Category
+        item.category = newcategory
+        item.name = newname
+        item.detail = newdetail
         # Commit to DB
         db_session.commit()
 

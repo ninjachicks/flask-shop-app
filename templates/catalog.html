@@ -22,10 +22,39 @@
                             {% if session.logged_in %}
                             <td class="td2-catalog"><a href="edit_cat/{{cat.id}}" class="btn btn-edit pull-right">Edit</a></td>
                             <td class="td2-catalog">
-                                <form action={{ url_for('delete_cat', id=cat.id) }} method='post'>
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <input type="submit" value="Delete" class="btn btn-delete">
-                                </form>
+                                
+                                <!-- Button trigger modal -->
+                                <button type="button" class="btn-delete" data-toggle="modal" data-target="#deleteWarning">
+                                Delete
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="deleteWarning" tabindex="-1" role="dialog" aria-labelledby="deleteWarningLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Warning</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete {{ cat.name }}?<br />
+                                        This cannot be undone.<br /><br />
+                                        Note: Items related to this category will remain in your catalog until deleted seperately.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn-go-back" data-dismiss="modal">Go back</button>
+                                        <div class="btn-del-inline">
+                                            <form action={{ url_for('delete_cat', id=cat.id) }} method='post'>
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <input type="submit" value="Delete" class="btn btn-delete">
+                                            </form>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+                                
                             </td>
                             {% endif %}
                         </tr>
@@ -46,10 +75,38 @@
                             {% if session.logged_in %}
                             <td class="td2-catalog"><a href="edit_item/{{item.id}}" class="btn btn-edit pull-right">Edit</a></td>
                             <td class="td2-catalog">
-                                <form action={{ url_for('delete_item', id=item.id) }} method='post'>
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <input type="submit" value="Delete" class="btn btn-delete">
-                                </form>
+
+                                <!-- Button trigger modal -->
+                                <button type="button" class="btn-delete" data-toggle="modal" data-target="#deleteWarning">
+                                Delete
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="deleteWarning" tabindex="-1" role="dialog" aria-labelledby="deleteWarningLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Warning</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Are you sure you want to delete {{ item.name }}?<br />
+                                        This cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn-go-back" data-dismiss="modal">Go back</button>
+                                        <div class="btn-del-inline">
+                                            <form action={{ url_for('delete_item', id=item.id) }} method='post'>
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <input type="submit" value="Delete" class="btn btn-delete">
+                                            </form>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+                                </div>
+
                             </td>
                             {% endif %}
                         </tr>

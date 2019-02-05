@@ -82,6 +82,9 @@ body {
 }
 
 .btn-delete {
+    width: 100px;
+    height: 35px;
+    border-style: none;
     border-radius: 2px;
     background-color: #f44271;
 }
@@ -140,4 +143,13 @@ body {
 .btn-del-inline {
     display: inline-block;
     margin-left: 20px;
+}
+
+.btn-go-back {
+    width: 100px;
+    height: 35px;
+    border-style: none;
+    border-radius: 2px;
+    background-color: #868585;
+    color: #fff;
 }

@@ -1,5 +1,6 @@
 import cgi
 import os
+import json
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 from flask_mysqldb import MySQL
 from functools import wraps
@@ -32,6 +33,11 @@ class RegisterForm(Form):
     ])
     confirm = PasswordField('Confirm Password')
 
+# Login Form
+class LoginForm(Form):
+    username = StringField('Username', [validators.Length(min=3, max=25)])
+    password = PasswordField('Password', [validators.DataRequired()])
+
 # Category Form Class
 class CategoryForm(Form):
     name = StringField('Name', [validators.Length(min=1, max=200)])
@@ -54,6 +60,27 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
+#JSON Catalog Endpoint
+@app.route('/catalog.json')
+def get_current_catalog():
+    # DBSession() instance
+    db_session = DBSession()
+    # Get current catalog
+    catalog = db_session.query(Categories).all()
+    results = {'Category': list()}
+
+    for category in catalog:
+        db_session = DBSession()
+        items = db_session.query(Items).filter(Items.category==category.name).all()
+        category_data = {
+            'id': category.id,
+            'name': category.name,
+            'items': [item.serialize for item in items]
+        }
+        results['Category'].append(category_data)
+    
+    #return jsonify(Catalog=[i.serialize for i in catalog])
+    return jsonify(results)
 
 # Logout
 @app.route('/logout')
@@ -122,8 +149,11 @@ def item(name, category):
 # Register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+
     form = RegisterForm(request.form)
+
     if request.method == 'POST' and form.validate():
+        # Populate Form Fields
         name = form.name.data
         email = form.email.data
         username = form.username.data
@@ -146,35 +176,49 @@ def register():
 # User login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
+
+    form = LoginForm(request.form)
+
+    if request.method == 'POST' and form.validate():
         # Get Form Fields
-        username = request.form['username']
-        password_post = request.form['password']
+        username = form.username.data
+        password_post = form.password.data
+        #username = request.form['username']
+        #password_post = request.form['password']
 
         # Creating DB Session
         db_session = DBSession()
-        user = db_session.query(Users).filter(Users.username==username).first()
 
-        if sha256_crypt.verify(password_post, user.password):
-            # Passed
-            session['logged_in'] = True
-            session['username'] = username
+        try:
+            # Getting User Data
+            user = db_session.query(Users).filter(Users.username==username).first()
 
-            flash('You are now logged in', 'success')
-            return redirect(url_for('home'))
+            # Password Verification
+            if sha256_crypt.verify(password_post, user.password) and username==user.username:
+                # Passed
+                session['logged_in'] = True
+                session['username'] = username
 
-        else:
+                flash('You are now logged in', 'success')
+                return redirect(url_for('home'))
+
+            else:
+                error = 'Invalid login'
+                return render_template('login.html', error=error, form=form) 
+
+        except:
             error = 'Invalid login'
-            return render_template('login.html', error=error) 
+            return render_template('login.html', error=error, form=form) 
     
     else:
-        return render_template('login.html')
+        return render_template('login.html', form=form)
 
 
 # Add Category
 @app.route('/add_category', methods=['GET', 'POST'])
 @is_logged_in
 def add_category():
+
     form = CategoryForm(request.form)
 
     if request.method == 'POST' and form.validate():
@@ -308,7 +352,7 @@ def edit_item(id):
 
     # Get Form
     form = ItemForm(request.form)
-    
+
     # Populate item form fields
     #form = ItemForm(request.POST, obj=categories)
     form.category.choices = [(c.name, c.name) for c in categories]

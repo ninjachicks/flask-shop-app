@@ -24,6 +24,16 @@ class Items(Base):
     creation_time = Column(DateTime, default=datetime.datetime.now)
     modification_time = Column(DateTime, onupdate=datetime.datetime.now)
 
+    @property
+    def serialize(self):
+        # Return object data in easily serializeable format
+        return {
+            'id': self.id,
+            'name': self.name,
+            'detail': self.detail,
+            'category': self.category
+        }
+
 class Users(Base):
 
     __tablename__ = 'users'

@@ -158,6 +158,11 @@ body {
     z-index: auto; 
 }
 
+.category-list li {
+    min-height: 50px;
+    padding: 10px;
+}
+
 .hide {
     display: none;
 }

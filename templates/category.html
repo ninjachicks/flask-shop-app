@@ -6,16 +6,22 @@
         <h5>( {{ countitems }} items )</h5>
         <hr>
         <div>
-            <ul class="list-group">
+            <ul class="list-group category-list">
+            {% for item in category %}
                 <li class="list-group-item catalog-list">
                     <table class="table-responsive">
                         <tr>
-                        {% for item in category %}
-                            <td class="td1-catalog"><a class="a-cat-catalog" href="{{item.category}}/{{item.name}}">{{ item.name }}</a></td>
-                        {% endfor %}
+                            <td class="td1-catalog">
+                                <a class="a-cat-catalog" href="{{item.category}}/{{item.name}}"><h5>{{ item.name }}</h5></a>
+                                <br />
+                                {{ item.detail | truncate(150) | safe}}
+                                <br />
+                                <a class="a-cat-catalog" href="{{item.category}}/{{item.name}}">[Read more...]</a>
+                            </td>
                         </tr>
                     </table>
                 </li>
+           {% endfor %}
             </ul>
         </div>
     {% endfor %}

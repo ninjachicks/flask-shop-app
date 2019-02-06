@@ -112,7 +112,7 @@ def catalog():
 
     catalog = db_session.query(Categories).order_by(Categories.name)
     
-    latestitems = db_session.query(Items).order_by(Items.creation_time.desc())
+    latestitems = db_session.query(Items).order_by(Items.creation_time.desc()).limit(10)
 
     # returns 2 variables for template 'catalog'
     return render_template('catalog.html', catalog=catalog, latestitems=latestitems)

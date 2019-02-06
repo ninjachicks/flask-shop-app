@@ -153,3 +153,11 @@ body {
     background-color: #868585;
     color: #fff;
 }
+
+.list-group-item, .list-group-item:hover { 
+    z-index: auto; 
+}
+
+.hide {
+    display: none;
+}

@@ -15,7 +15,6 @@
             <h5 class="h5-catalog"><i class="fas fa-tags"></i>&nbsp;Categories</h5>
             <ul class="list-group">
             {% for cat in catalog %}
-               <div class="hide">{{ loop.index }}</div>
                 <li class="list-group-item catalog-list">
                     <table class="table-responsive">
                         <tr>
@@ -69,7 +68,6 @@
             <h5 class="h5-catalog">10 Latest Items</h5>
             <ul class="list-group">
             {% for item in latestitems %}
-            <div class="hide">{{ loop.index }}</div>
                 <li class="list-group-item catalog-list">
                     <table class="table-responsive">
                         <tr>
@@ -80,11 +78,11 @@
                             <td class="td2-catalog">
 
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn-delete" data-toggle="modal" data-target="#deleteWarning{{loop.index}}">
+                                <button type="button" class="btn-delete" data-toggle="modal" data-target="#itemdeleteWarning{{loop.index}}">
                                     Delete
                                 </button>
                                 <!-- Modal -->
-                                <div class="modal fade" id="deleteWarning{{loop.index}}" tabindex="-1" role="dialog" aria-labelledby="deleteWarningLabel" aria-hidden="true">
+                                <div class="modal fade" id="itemdeleteWarning{{loop.index}}" tabindex="-1" role="dialog" aria-labelledby="deleteWarningLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">

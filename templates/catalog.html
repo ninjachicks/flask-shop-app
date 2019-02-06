@@ -24,7 +24,7 @@
                             <td class="td2-catalog">
                                 
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn-delete" data-toggle="modal" data-target="#deleteWarning{{loop.index}}">
+                                <button type="button" class="btn btn-delete" data-toggle="modal" data-target="#deleteWarning{{loop.index}}">
                                 Delete
                                 </button>
                                 <!-- Modal -->
@@ -44,8 +44,8 @@
                                         Items related to this category will remain in your catalog until deleted seperately.
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn-go-back" data-dismiss="modal">Go back</button>
-                                        <div class="btn-del-inline">
+                                        <button type="button" class="btn btn-go-back" data-dismiss="modal">Go back</button>
+                                        <div class="btn btn-del-inline">
                                             <form action={{ url_for('delete_cat', id=cat.id) }} method='post'>
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <input type="submit" value="Delete" class="btn btn-delete">
@@ -78,7 +78,7 @@
                             <td class="td2-catalog">
 
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn-delete" data-toggle="modal" data-target="#itemdeleteWarning{{loop.index}}">
+                                <button type="button" class="btn btn-delete" data-toggle="modal" data-target="#itemdeleteWarning{{loop.index}}">
                                     Delete
                                 </button>
                                 <!-- Modal -->
@@ -96,8 +96,8 @@
                                                 This cannot be undone.
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn-go-back" data-dismiss="modal">Go back</button>
-                                                <div class="btn-del-inline">
+                                                <button type="button" class="btn btn-go-back" data-dismiss="modal">Go back</button>
+                                                <div class="btn btn-del-inline">
                                                     <form action={{ url_for('delete_item', id=item.id) }} method='post'>
                                                         <input type="hidden" name="_method" value="DELETE">
                                                         <input type="submit" value="Delete" class="btn btn-delete">

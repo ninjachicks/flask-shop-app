@@ -1,3 +1,6 @@
+
+/* ###############  General Styles  ##################### */
+
 body {
     background-color: #e1e9f7;
     color: #1c3c7c;
@@ -14,6 +17,25 @@ body {
     padding: 40px;
     margin-top: 40px;
 }
+
+.h5-catalog {
+    margin: 20px 0;
+}
+
+.width-max {
+    width: 100%;
+    text-align: right;
+}
+
+.select {
+    margin: 60px 0 20px 0;
+}
+
+.hide {
+    display: none;
+}
+
+/* ###############  Navigation  ##################### */
 
 .my-nav {
     background-color: #6f90c6;
@@ -37,78 +59,10 @@ body {
     color: #fff;
 }
 
+/* ###############  Tables and Lists  ##################### */
+
 .table-catalog {
     width: 50%;
-}
-
-.list-group-item {
-    padding: 0;
-}
-
-.catalog-list {
-    background-color: #d0dbed;
-}
-
-.btn-catalog {
-    background-color: #6f90c6;
-    border-radius: 2px;
-    margin-left: 10px;
-}
-
-.btn-catalog:hover {
-    color: #fff;
-}
-
-.h5-catalog {
-    margin: 20px 0;
-}
-
-.a-cat-catalog {
-    color: #1c3c7c;
-}
-
-.a-cat-catalog:hover {
-    color: #6f90c6;
-    text-decoration: none;
-}
-
-.btn-edit {
-    border-radius: 2px;
-    background-color: #6f90c6;
-}
-
-.btn-edit:hover {
-    color: #fff;
-}
-
-.btn-delete {
-    width: 100px;
-    height: 35px;
-    border-style: none;
-    border-radius: 2px;
-    background-color: #f44271;
-}
-
-.btn-delete:hover {
-    color: #fff;
-}
-
-.width-max {
-    width: 100%;
-    text-align: right;
-}
-
-.btn-cat-additem {
-    border-radius: 2px;
-    background-color: #6f90c6;
-    margin: 20px 0;
-    color: #fff;
-}
-
-.btn-submit {
-    border-radius: 2px;
-    background-color: #4ec4c4;
-    color: #fff;
 }
 
 .td1-catalog {
@@ -127,8 +81,77 @@ body {
     border-style: none;
 }
 
-.select {
-    margin: 60px 0 20px 0;
+.list-group-item {
+    padding: 0;
+}
+
+.catalog-list {
+    background-color: #d0dbed;
+}
+
+.list-group-item, .list-group-item:hover { 
+    z-index: auto; 
+}
+
+.category-list li {
+    min-height: 50px;
+    padding: 10px;
+}
+
+/* ###############  Links  ##################### */
+
+.a-cat-catalog {
+    color: #1c3c7c;
+}
+
+.a-cat-catalog:hover {
+    color: #6f90c6;
+    text-decoration: none;
+}
+
+/* ###############  Buttons  ##################### */
+
+.btn-catalog {
+    background-color: #6f90c6;
+    border-radius: 2px;
+    margin-left: 10px;
+}
+
+.btn-catalog:hover {
+    color: #fff;
+}
+
+.btn-edit {
+    border-style: none;
+    border-radius: 2px;
+    background-color: #6f90c6;
+}
+
+.btn-edit:hover {
+    color: #fff;
+}
+
+.btn-delete {
+    border-style: none;
+    border-radius: 2px;
+    background-color: #f44271;
+}
+
+.btn-delete:hover {
+    color: #fff;
+}
+
+.btn-cat-additem {
+    border-radius: 2px;
+    background-color: #6f90c6;
+    margin: 20px 0;
+    color: #fff;
+}
+
+.btn-submit {
+    border-radius: 2px;
+    background-color: #4ec4c4;
+    color: #fff;
 }
 
 .btn-inline {
@@ -146,23 +169,8 @@ body {
 }
 
 .btn-go-back {
-    width: 100px;
-    height: 35px;
     border-style: none;
     border-radius: 2px;
     background-color: #868585;
     color: #fff;
-}
-
-.list-group-item, .list-group-item:hover { 
-    z-index: auto; 
-}
-
-.category-list li {
-    min-height: 50px;
-    padding: 10px;
-}
-
-.hide {
-    display: none;
 }

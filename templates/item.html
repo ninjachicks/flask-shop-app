@@ -14,7 +14,7 @@
             </div>
             
             <!-- Button trigger modal -->
-            <button type="button" class="btn-delete btn-del-inline" data-toggle="modal" data-target="#deleteWarning">
+            <button type="button" class="btn btn-delete btn-del-inline" data-toggle="modal" data-target="#deleteWarning">
             Delete
             </button>
             <!-- Modal -->
@@ -32,8 +32,8 @@
                     This cannot be undone.
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-go-back" data-dismiss="modal">Go back</button>
-                    <div class="btn-del-inline">
+                    <button type="button" class="btn btn-go-back" data-dismiss="modal">Go back</button>
+                    <div class="btn btn-del-inline">
                         <form action={{ url_for('delete_item', id=entry.id) }} method='post'>
                             <input type="hidden" name="_method" value="DELETE">
                             <input type="submit" value="Delete" class="btn btn-delete">

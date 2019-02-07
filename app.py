@@ -79,7 +79,6 @@ def get_current_catalog():
         }
         results['Category'].append(category_data)
     
-    #return jsonify(Catalog=[i.serialize for i in catalog])
     return jsonify(results)
 
 # Logout
@@ -356,7 +355,7 @@ def edit_item(id):
     # Populate item form fields
     #form = ItemForm(request.POST, obj=categories)
     form.category.choices = [(c.name, c.name) for c in categories]
-    form.category.choices = [(item.category, item.category)]
+    form.category.default = [(item.category, item.category)]
     form.name.data = item.name
     form.detail.data = item.detail
 

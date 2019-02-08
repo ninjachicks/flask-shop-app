@@ -1,14 +1,15 @@
+#!/usr/bin/env python3
+
 import cgi
 import os
 import json
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
+from sqlalchemy import create_engine, insert, delete, update
+from sqlalchemy.orm import sessionmaker
 from flask_mysqldb import MySQL
 from functools import wraps
 from passlib.hash import sha256_crypt
-from sqlalchemy import create_engine, insert, delete, update
-from sqlalchemy.orm import sessionmaker
 from wtforms import Form, StringField, TextAreaField, PasswordField, SelectField, validators
-
 from database_setup import Categories, Items, Users, Base
 
 # Creating DB Engine
@@ -60,6 +61,7 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
+
 #JSON Catalog Endpoint
 @app.route('/catalog.json')
 def get_current_catalog():
@@ -71,7 +73,7 @@ def get_current_catalog():
 
     for category in catalog:
         db_session = DBSession()
-        items = db_session.query(Items).filter(Items.category==category.name).all()
+        items = db_session.query(Items).filter(Items.category == category.name).all()
         category_data = {
             'id': category.id,
             'name': category.name,
@@ -80,6 +82,7 @@ def get_current_catalog():
         results['Category'].append(category_data)
     
     return jsonify(results)
+
 
 # Logout
 @app.route('/logout')
@@ -113,7 +116,7 @@ def catalog():
     
     latestitems = db_session.query(Items).order_by(Items.creation_time.desc()).limit(10)
 
-    # returns 2 variables for template 'catalog'
+    # returns 2 variables for template 'catalog
     return render_template('catalog.html', catalog=catalog, latestitems=latestitems)
 
 
@@ -124,14 +127,15 @@ def category(name):
     # DBSession() instance
     db_session = DBSession()
 
-    catalog = db_session.query(Categories.name).filter(Categories.name==name)
+    catalog = db_session.query(Categories.name).filter(Categories.name == name)
 
-    category = db_session.query(Items).filter(Items.category==name)
+    category = db_session.query(Items).filter(Items.category == name)
 
-    countitems = db_session.query(Items).filter(Items.category==name).count()
+    countitems = db_session.query(Items).filter(Items.category == name).count()
 
-    # returns 2 variables for template 'categories'
-    return render_template('category.html', category=category, catalog=catalog, countitems=countitems)
+    # returns 2 variables for template 'categories
+    return render_template('category.html', category=category, catalog=catalog, 
+        countitems=countitems)
 
 
 # Single Item Page
@@ -141,7 +145,7 @@ def item(name, category):
     # DBSession() instance
     db_session = DBSession()
 
-    singleitem = db_session.query(Items).filter(Items.name==name)
+    singleitem = db_session.query(Items).filter(Items.name == name)
 
     return render_template('item.html', singleitem=singleitem)
 
@@ -190,10 +194,10 @@ def login():
 
         try:
             # Getting User Data
-            user = db_session.query(Users).filter(Users.username==username).first()
+            user = db_session.query(Users).filter(Users.username == username).first()
 
             # Password Verification
-            if sha256_crypt.verify(password_post, user.password) and username==user.username:
+            if sha256_crypt.verify(password_post, user.password) and username == user.username:
                 # Passed
                 session['logged_in'] = True
                 session['username'] = username
@@ -203,11 +207,11 @@ def login():
 
             else:
                 error = 'Invalid login'
-                return render_template('login.html', error=error, form=form) 
+                return render_template('login.html', error=error, form=form)
 
         except:
             error = 'Invalid login'
-            return render_template('login.html', error=error, form=form) 
+            return render_template('login.html', error=error, form=form)
     
     else:
         return render_template('login.html', form=form)
@@ -224,7 +228,7 @@ def add_category():
         # Get Form Values
         name = form.name.data
         # Open DB Session
-        db_session = DBSession()      
+        db_session = DBSession()
         # Insert into DB
         newcategory = Categories(name=name)
         db_session.add(newcategory)
@@ -243,9 +247,9 @@ def add_category():
 def delete_cat(id):
 
     # Open DB Session
-    db_session = DBSession()     
+    db_session = DBSession()
     # Fetch Category from DB
-    result = db_session.query(Categories).filter(Categories.id==id).first()
+    result = db_session.query(Categories).filter(Categories.id == id).first()
     # Delete Category
     db_session.delete(result)
     # Commit to DB
@@ -264,7 +268,7 @@ def edit_cat(id):
     # Creating DB Session
     db_session = DBSession()
     # Fetch Category from DB
-    category = db_session.query(Categories).filter(Categories.id==id).first()
+    category = db_session.query(Categories).filter(Categories.id == id).first()
 
     # Get Form
     form = CategoryForm(request.form)
@@ -288,7 +292,7 @@ def edit_cat(id):
 
 
 # Add Item
-@app.route('/add_item', methods=['GET','POST'])
+@app.route('/add_item', methods=['GET', 'POST'])
 @is_logged_in
 def add_item():
 
@@ -306,10 +310,10 @@ def add_item():
         detail = form.detail.data
         category = form.category.data
 
-        db_session = DBSession()    
+        db_session = DBSession()
         # Insert into DB
         newitem = Items(name=name, detail=detail, category=category)
-        db_session.add(newitem)    
+        db_session.add(newitem)
 
         # Commit to DB
         db_session.commit()
@@ -326,7 +330,7 @@ def add_item():
 def delete_item(id):
 
     # Open DB Session
-    db_session = DBSession()      
+    db_session = DBSession()
     # Fetch Category from DB
     delitem = db_session.query(Items).filter(Items.id==id).first()
     # Delete Item
@@ -346,16 +350,14 @@ def edit_item(id):
     # Creating DB Session
     db_session = DBSession()
 
-    item = db_session.query(Items).filter(Items.id==id).first()
+    item = db_session.query(Items).filter(Items.id == id).first()
     categories = db_session.query(Categories)
 
     # Get Form
     form = ItemForm(request.form)
 
     # Populate item form fields
-    #form = ItemForm(request.POST, obj=categories)
     form.category.choices = [(c.name, c.name) for c in categories]
-    form.category.default = [(item.category, item.category)]
     form.name.data = item.name
     form.detail.data = item.detail
 

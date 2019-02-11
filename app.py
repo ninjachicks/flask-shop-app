@@ -3,13 +3,15 @@
 import cgi
 import os
 import json
-from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
+from flask import (Flask, render_template, flash, redirect, 
+    url_for, session, logging, request, jsonify)
 from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
 from flask_mysqldb import MySQL
 from functools import wraps
 from passlib.hash import sha256_crypt
-from wtforms import Form, StringField, TextAreaField, PasswordField, SelectField, validators
+from wtforms import (Form, StringField, TextAreaField, 
+    PasswordField, SelectField, validators)
 from database_setup import Categories, Items, Users, Base
 
 # Creating DB Engine
@@ -82,6 +84,28 @@ def get_current_catalog():
         results['Category'].append(category_data)
     
     return jsonify(results)
+
+
+#JSON Catalog Item Endpoint ####################################################
+# @app.route('/catalog.json')
+# def get_current_catalog():
+#     # DBSession() instance
+#     db_session = DBSession()
+#     # Get current catalog
+#     catalog = db_session.query(Categories).all()
+#     results = {'Category': list()}
+
+#     for category in catalog:
+#         db_session = DBSession()
+#         items = db_session.query(Items).filter(Items.category == category.name).all()
+#         category_data = {
+#             'id': category.id,
+#             'name': category.name,
+#             'items': [item.serialize for item in items]
+#         }
+#         results['Category'].append(category_data)
+    
+#     return jsonify(results)
 
 
 # Logout
@@ -360,6 +384,10 @@ def edit_item(id):
     form.category.choices = [(c.name, c.name) for c in categories]
     form.name.data = item.name
     form.detail.data = item.detail
+    form.name.default = item.name
+    form.detail.default = item.detail
+    form.category.default = item.category
+    form.process()
 
     if request.method == 'POST' and form.validate():
         newcategory = request.form['category']

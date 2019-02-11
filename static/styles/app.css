@@ -109,6 +109,16 @@ body {
     text-decoration: none;
 }
 
+.a-google-login {
+    margin-left: 10px;
+    color: #4ec4c4;
+    text-decoration: underline;
+}
+
+.a-google-login:hover {
+    color: #fff;
+}
+
 /* ###############  Buttons  ##################### */
 
 .btn-catalog {

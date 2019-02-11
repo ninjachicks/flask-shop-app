@@ -1,17 +1,11 @@
 import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy import create_engine
 
 
 Base = declarative_base()
-
-class Categories(Base):
-    __tablename__ = 'categories'
-
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(100), nullable=False)
 
 class Items(Base):
 
@@ -20,7 +14,7 @@ class Items(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(250), nullable=False)
     detail = Column(String(500))
-    category = Column(Integer, ForeignKey('categories.id'))
+    category = Column(Integer, ForeignKey('categories.id', ondelete="CASCADE"))
     creation_time = Column(DateTime, default=datetime.datetime.now)
     modification_time = Column(DateTime, onupdate=datetime.datetime.now)
 
@@ -33,6 +27,15 @@ class Items(Base):
             'detail': self.detail,
             'category': self.category
         }
+
+
+class Categories(Base):
+    __tablename__ = 'categories'
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    name = Column(String(100), nullable=False)
+    child = relationship(Items, backref="parent", passive_deletes="all")
+
 
 class Users(Base):
 

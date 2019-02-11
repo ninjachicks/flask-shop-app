@@ -3,6 +3,11 @@
 {% block body %}
     <h1>Register</h1>
 
+    or
+    <a href="{{ url_for('github_login') }}" class="a-google-login">Login with GitHub-Account</a>
+    <br />
+    <br />
+
     {% from "includes/_formhelper.html" import render_field %}
     <form method="POST" action="">
         <div class="form-group">

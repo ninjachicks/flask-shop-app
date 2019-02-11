@@ -8,6 +8,7 @@ from flask import (Flask, render_template, flash, redirect,
 from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
 from flask_mysqldb import MySQL
+from flask_dance.contrib.github import make_github_blueprint, github
 from functools import wraps
 from passlib.hash import sha256_crypt
 from wtforms import (Form, StringField, TextAreaField, 
@@ -23,6 +24,9 @@ DBSession = sessionmaker(bind=engine)
 
 
 app = Flask(__name__)
+
+github_blueprint = make_github_blueprint(client_id='0014280a3d68abcc37ac', client_secret='5e7a97cd939dbfe52fa929cf62d56664b08724a4')
+app.register_blueprint(github_blueprint, url_prefix='/github_login')
 
 
 # Register Form Class
@@ -200,8 +204,6 @@ def login():
         # Get Form Fields
         username = form.username.data
         password_post = form.password.data
-        #username = request.form['username']
-        #password_post = request.form['password']
 
         # Creating DB Session
         db_session = DBSession()
@@ -229,6 +231,23 @@ def login():
     
     else:
         return render_template('login.html', form=form)
+
+
+# GitHub Login
+@app.route("/github")
+def github_login():
+
+    if not github.authorized:
+        return redirect(url_for('github.login'))
+    account_info = github.get('/user')
+
+    if account_info.ok:
+        flash('You are now logged in', 'success')
+        return render_template('home.html')
+
+    flash('Request failed', 'danger')
+
+    return render_template('home.html')
 
 
 # Add Category

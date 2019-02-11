@@ -86,26 +86,16 @@ def get_current_catalog():
     return jsonify(results)
 
 
-#JSON Catalog Item Endpoint ####################################################
-# @app.route('/catalog.json')
-# def get_current_catalog():
-#     # DBSession() instance
-#     db_session = DBSession()
-#     # Get current catalog
-#     catalog = db_session.query(Categories).all()
-#     results = {'Category': list()}
+# JSON Catalog Item Endpoint
+@app.route('/<string:category>/<string:name>/JSON')
+def get_single_item(category, name):
 
-#     for category in catalog:
-#         db_session = DBSession()
-#         items = db_session.query(Items).filter(Items.category == category.name).all()
-#         category_data = {
-#             'id': category.id,
-#             'name': category.name,
-#             'items': [item.serialize for item in items]
-#         }
-#         results['Category'].append(category_data)
-    
-#     return jsonify(results)
+    # DBSession() instance
+    db_session = DBSession()
+
+    singleitem = db_session.query(Items).filter(Items.name == name)
+
+    return jsonify(Item=[i.serialize for i in singleitem.all()])
 
 
 # Logout

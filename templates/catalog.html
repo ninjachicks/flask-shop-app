@@ -10,6 +10,13 @@
     {% endif %}
     </div>
     <table class="table table-striped">
+        <tr>
+        {% for id in user_id %}
+            {{user_id}}
+        {% endfor %}
+            <td>
+            </td>
+        </tr>
       <tr>
         <td class="table-catalog">
             <h5 class="h5-catalog"><i class="fas fa-tags"></i>&nbsp;Categories</h5>
@@ -19,7 +26,8 @@
                     <table class="table-responsive">
                         <tr>
                             <td class="td1-catalog"><a class="a-cat-catalog" href="{{cat.name}}">{{ cat.name }}</a></td>
-                            {% if session.logged_in %}
+                            {% for id in user_id%}
+                            {% if session.logged_in and (cat.user_id==user_id) %}
                             <td class="td2-catalog"><a href="edit_cat/{{cat.id}}" class="btn btn-edit pull-right">Edit</a></td>
                             <td class="td2-catalog">
                                 
@@ -61,6 +69,7 @@
                         </tr>
                     </table>
                 </li>
+            {% endfor %}
             {% endfor %}
             </ul>
         </td>

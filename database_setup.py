@@ -17,6 +17,7 @@ class Items(Base):
     category = Column(Integer, ForeignKey('categories.id', ondelete="CASCADE"))
     creation_time = Column(DateTime, default=datetime.datetime.now)
     modification_time = Column(DateTime, onupdate=datetime.datetime.now)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     @property
     def serialize(self):
@@ -35,6 +36,7 @@ class Categories(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(100), nullable=False)
     child = relationship(Items, backref="parent", passive_deletes="all")
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 
 class Users(Base):

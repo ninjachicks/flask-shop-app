@@ -8,12 +8,19 @@ from flask import (Flask, render_template, flash, redirect,
 from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
 from flask_mysqldb import MySQL
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from flask_dance.contrib.github import make_github_blueprint, github
 from functools import wraps
 from passlib.hash import sha256_crypt
 from wtforms import (Form, StringField, TextAreaField, 
     PasswordField, SelectField, validators)
 from database_setup import Categories, Items, Users, Base
+
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskshop.db'
+
 
 # Creating DB Engine
 engine = create_engine('sqlite:///flaskshop.db')
@@ -22,10 +29,11 @@ Base.metadata.bind = engine
 # Declaring sessionmaker
 DBSession = sessionmaker(bind=engine)
 
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-app = Flask(__name__)
 
-github_blueprint = make_github_blueprint(client_id='0014280a3d68abcc37ac', client_secret='5e7a97cd939dbfe52fa929cf62d56664b08724a4')
+github_blueprint = make_github_blueprint(client_id='0014280a3d68abcc37ac', client_secret='5e7a97cd939dbfe52fa929cf62d56664b08724a4', redirect_url='/')
 app.register_blueprint(github_blueprint, url_prefix='/github_login')
 
 
@@ -123,50 +131,6 @@ def about():
     return render_template('about.html')
 
 
-# Catalog
-@app.route("/catalog")
-def catalog():
-    
-    # DBSession() instance
-    db_session = DBSession()
-
-    catalog = db_session.query(Categories).order_by(Categories.name)
-    
-    latestitems = db_session.query(Items).order_by(Items.creation_time.desc()).limit(10)
-
-    # returns 2 variables for template 'catalog
-    return render_template('catalog.html', catalog=catalog, latestitems=latestitems)
-
-
-# Single Category
-@app.route("/<string:name>")
-def category(name):
-
-    # DBSession() instance
-    db_session = DBSession()
-
-    catalog = db_session.query(Categories.name).filter(Categories.name == name)
-
-    category = db_session.query(Items).filter(Items.category == name)
-
-    countitems = db_session.query(Items).filter(Items.category == name).count()
-
-    # returns 2 variables for template 'categories
-    return render_template('category.html', category=category, catalog=catalog, 
-        countitems=countitems)
-
-
-# Single Item Page
-@app.route("/<string:category>/<string:name>/")
-def item(name, category):
-    
-    # DBSession() instance
-    db_session = DBSession()
-
-    singleitem = db_session.query(Items).filter(Items.name == name)
-
-    return render_template('item.html', singleitem=singleitem)
-
 # Register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -193,6 +157,7 @@ def register():
 
         return redirect(url_for('home'))
     return render_template('register.html', form=form)
+
 
 # User login
 @app.route('/login', methods=['GET', 'POST'])
@@ -233,6 +198,16 @@ def login():
         return render_template('login.html', form=form)
 
 
+# # GitHub Login
+# @app.route("/github")
+# def github_login():
+
+#     session['logged_in'] = True
+
+#     flash('You are now logged in', 'success')
+#     return redirect(url_for('home'))
+
+
 # GitHub Login
 @app.route("/github")
 def github_login():
@@ -241,13 +216,72 @@ def github_login():
         return redirect(url_for('github.login'))
     account_info = github.get('/user')
 
-    if account_info.ok:
-        flash('You are now logged in', 'success')
-        return render_template('home.html')
-
-    flash('Request failed', 'danger')
-
+@app.route("/itworks")
+def itworks():
     return render_template('home.html')
+
+    # if account_info.ok:
+    #     account_info_json = account_info.json()
+    #     username = account_info_json['login']
+    #     # Passed
+    #     session['logged_in'] = True
+    #     session['username'] = username
+
+    #     flash('You are now logged in', 'success')
+    #     return redirect(url_for('home'))
+
+    # flash('Request failed', 'danger')
+
+    # return render_template('home.html')
+
+
+# Catalog
+@app.route("/catalog")
+def catalog():
+    
+    # DBSession() instance
+    db_session = DBSession()
+    # get Username from session
+    username = session.get('username')
+
+    catalog = db_session.query(Categories).order_by(Categories.name)
+    
+    latestitems = db_session.query(Items).order_by(Items.creation_time.desc()).limit(10)
+
+    user_id = db_session.query(Users.id).filter(Users.name == username).all()
+
+    # returns 2 variables for template 'catalog
+    return render_template('catalog.html', catalog=catalog, latestitems=latestitems, user_id=user_id)
+
+
+# Single Category
+@app.route("/<string:name>")
+def category(name):
+
+    # DBSession() instance
+    db_session = DBSession()
+
+    catalog = db_session.query(Categories.name).filter(Categories.name == name)
+
+    category = db_session.query(Items).filter(Items.category == name)
+
+    countitems = db_session.query(Items).filter(Items.category == name).count()
+
+    # returns 2 variables for template 'categories
+    return render_template('category.html', category=category, catalog=catalog, 
+        countitems=countitems)
+
+
+# Single Item Page
+@app.route("/<string:category>/<string:name>/")
+def item(name, category):
+    
+    # DBSession() instance
+    db_session = DBSession()
+
+    singleitem = db_session.query(Items).filter(Items.name == name)
+
+    return render_template('item.html', singleitem=singleitem)
 
 
 # Add Category
@@ -256,6 +290,12 @@ def github_login():
 def add_category():
 
     form = CategoryForm(request.form)
+    # get Username from session
+    username = session.get('username')
+    # Open DB Session
+    db_session = DBSession()
+    # get user_id from DB
+    user_id = db_session.query(Users.id).filter(Users.name == username).all()
 
     if request.method == 'POST' and form.validate():
         # Get Form Values
@@ -264,7 +304,8 @@ def add_category():
         db_session = DBSession()
         # Insert into DB
         newcategory = Categories(name=name)
-        db_session.add(newcategory)
+        user_id = Categories(user_id=user_id)
+        db_session.add(newcategory, user_id)
         # Commit to DB
         db_session.commit()
 
@@ -420,4 +461,4 @@ def edit_item(id):
 
 if __name__ == "__main__":
     app.secret_key = os.urandom(12)
-    app.run(debug=False)
+    app.run(debug=True)

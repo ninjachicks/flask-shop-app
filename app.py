@@ -3,6 +3,9 @@
 import cgi
 import os
 import json
+from functools import wraps
+from passlib.hash import sha256_crypt
+
 from flask import (Flask, render_template, flash, redirect, 
     url_for, session, logging, request, jsonify)
 from sqlalchemy import create_engine, insert, delete, update
@@ -11,10 +14,12 @@ from flask_mysqldb import MySQL
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_dance.contrib.github import make_github_blueprint, github
-from functools import wraps
-from passlib.hash import sha256_crypt
+
 from wtforms import (Form, StringField, TextAreaField, 
     PasswordField, SelectField, validators)
+from wtforms_alchemy import ModelForm
+
+
 from database_setup import Categories, Items, Users, Base
 
 
@@ -48,14 +53,25 @@ class RegisterForm(Form):
     ])
     confirm = PasswordField('Confirm Password')
 
+
 # Login Form
 class LoginForm(Form):
     username = StringField('Username', [validators.Length(min=3, max=25)])
     password = PasswordField('Password', [validators.DataRequired()])
 
+def tmp():
+    return True
 # Category Form Class
-class CategoryForm(Form):
-    name = StringField('Name', [validators.Length(min=1, max=200)])
+# class CategoryForm(Form):
+#     name = StringField('Name', [validators.Length(min=1, max=200)])
+class CategoryForm(ModelForm):
+    def get_session():
+        return db.session
+
+    class Meta:
+        model = Categories
+        only = ['name']
+        
 
 # Item Form Class
 class ItemForm(Form):
@@ -80,14 +96,14 @@ def is_logged_in(f):
 @app.route('/catalog.json')
 def get_current_catalog():
     # DBSession() instance
-    db_session = DBSession()
+    #db_session = DBSession()
     # Get current catalog
-    catalog = db_session.query(Categories).all()
+    catalog = db.session.query(Categories).all()
     results = {'Category': list()}
 
     for category in catalog:
-        db_session = DBSession()
-        items = db_session.query(Items).filter(Items.category == category.name).all()
+        #db_session = DBSession()
+        items = db.session.query(Items).filter(Items.category == category.name).all()
         category_data = {
             'id': category.id,
             'name': category.name,
@@ -103,9 +119,9 @@ def get_current_catalog():
 def get_single_item(category, name):
 
     # DBSession() instance
-    db_session = DBSession()
+    #db_session = DBSession()
 
-    singleitem = db_session.query(Items).filter(Items.name == name)
+    singleitem = db.session.query(Items).filter(Items.name == name)
 
     return jsonify(Item=[i.serialize for i in singleitem.all()])
 
@@ -145,13 +161,13 @@ def register():
         password = sha256_crypt.encrypt(str(form.password.data))
 
         # DBSession() instance
-        db_session = DBSession()
+        #db_session = DBSession()
 
         #import pdb; pdb.set_trace()
         new_user = Users(name=name, email=email, username=username, password=password)
-        db_session.add(new_user)
+        db.session.add(new_user)
         # commit to db
-        db_session.commit()
+        db.session.commit()
 
         flash('You are now registered and can log in!', 'success')
 
@@ -171,11 +187,11 @@ def login():
         password_post = form.password.data
 
         # Creating DB Session
-        db_session = DBSession()
+        #db_session = DBSession()
 
         try:
             # Getting User Data
-            user = db_session.query(Users).filter(Users.username == username).first()
+            user = db.session.query(Users).filter(Users.username == username).first()
 
             # Password Verification
             if sha256_crypt.verify(password_post, user.password) and username == user.username:
@@ -240,15 +256,15 @@ def itworks():
 def catalog():
     
     # DBSession() instance
-    db_session = DBSession()
+    #db_session = DBSession()
     # get Username from session
     username = session.get('username')
 
-    catalog = db_session.query(Categories).order_by(Categories.name)
+    catalog = db.session.query(Categories).order_by(Categories.name)
     
-    latestitems = db_session.query(Items).order_by(Items.creation_time.desc()).limit(10)
+    latestitems = db.session.query(Items).order_by(Items.creation_time.desc()).limit(10)
 
-    user_id = db_session.query(Users.id).filter(Users.name == username).all()
+    user_id = db.session.query(Users.id).filter(Users.username == username).scalar()
 
     # returns 2 variables for template 'catalog
     return render_template('catalog.html', catalog=catalog, latestitems=latestitems, user_id=user_id)
@@ -259,13 +275,13 @@ def catalog():
 def category(name):
 
     # DBSession() instance
-    db_session = DBSession()
+    #db_session = DBSession()
 
-    catalog = db_session.query(Categories.name).filter(Categories.name == name)
+    catalog = db.session.query(Categories.name).filter(Categories.name == name)
 
-    category = db_session.query(Items).filter(Items.category == name)
+    category = db.session.query(Items).filter(Items.category == name)
 
-    countitems = db_session.query(Items).filter(Items.category == name).count()
+    countitems = db.session.query(Items).filter(Items.category == name).count()
 
     # returns 2 variables for template 'categories
     return render_template('category.html', category=category, catalog=catalog, 
@@ -277,9 +293,9 @@ def category(name):
 def item(name, category):
     
     # DBSession() instance
-    db_session = DBSession()
+    #db_session = DBSession()
 
-    singleitem = db_session.query(Items).filter(Items.name == name)
+    singleitem = db.session.query(Items).filter(Items.name == name)
 
     return render_template('item.html', singleitem=singleitem)
 
@@ -293,25 +309,31 @@ def add_category():
     # get Username from session
     username = session.get('username')
     # Open DB Session
-    db_session = DBSession()
+    #db_session = DBSession()
     # get user_id from DB
-    user_id = db_session.query(Users.id).filter(Users.name == username).all()
+    #user_id = db_session.query(Users.id).filter(Users.name == username).all()
+
+    user = db.session.query(Users).filter(Users.username == username).first()
+    user_id = user.id
 
     if request.method == 'POST' and form.validate():
+
         # Get Form Values
         name = form.name.data
         # Open DB Session
-        db_session = DBSession()
+        #db_session = DBSession()
         # Insert into DB
-        newcategory = Categories(name=name)
-        user_id = Categories(user_id=user_id)
-        db_session.add(newcategory, user_id)
+        newcategory = Categories(name=name, user_id=user_id)
+        db.session.add(newcategory, user_id)
         # Commit to DB
-        db_session.commit()
+        db.session.commit()
 
         flash('Category created', 'success')
 
         return redirect(url_for('catalog'))
+    else:
+        flash(str(form.errors))
+
     return render_template('add_category.html', form=form)
 
 
@@ -321,13 +343,13 @@ def add_category():
 def delete_cat(id):
 
     # Open DB Session
-    db_session = DBSession()
+    #db_session = DBSession()
     # Fetch Category from DB
-    result = db_session.query(Categories).filter(Categories.id == id).first()
+    result = db.session.query(Categories).filter(Categories.id == id).first()
     # Delete Category
-    db_session.delete(result)
+    db.session.delete(result)
     # Commit to DB
-    db_session.commit()
+    db.session.commit()
 
     flash('Category deleted', 'success')
 
@@ -340,9 +362,9 @@ def delete_cat(id):
 def edit_cat(id):
 
     # Creating DB Session
-    db_session = DBSession()
+    #db_session = DBSession()
     # Fetch Category from DB
-    category = db_session.query(Categories).filter(Categories.id == id).first()
+    category = db.session.query(Categories).filter(Categories.id == id).first()
 
     # Get Form
     form = CategoryForm(request.form)
@@ -357,7 +379,7 @@ def edit_cat(id):
         # Edit Category
         category.name = newname
         # Commit to DB
-        db_session.commit()
+        db.session.commit()
 
         flash('Category updated', 'success')
 
@@ -371,10 +393,15 @@ def edit_cat(id):
 def add_item():
 
     form = ItemForm(request.form)
+
+    username = session.get('username')
     # DBSession() instance
-    db_session = DBSession()
+    #db_session = DBSession()
     # get categories for dropdown
-    categories = db_session.query(Categories)
+    categories = db.session.query(Categories)
+
+    user = db.session.query(Users).filter(Users.username == username).first()
+    user_id = user.id
     #form = ItemForm(request.POST, obj=categories)
     form.category.choices = [(c.name, c.name) for c in categories]
 
@@ -384,19 +411,17 @@ def add_item():
         detail = form.detail.data
         category = form.category.data
 
-        db_session = DBSession()
-        # Insert into DB
-        newitem = Items(name=name, detail=detail, category=category)
-        db_session.add(newitem)
+        newitem = Items(name=name, detail=detail, category=category, user_id=user_id)
+        db.session.add(newitem)
 
         # Commit to DB
-        db_session.commit()
+        db.session.commit()
 
         flash('Item created', 'success')
 
         return redirect(url_for('catalog'))
 
-    return render_template('add_item.html', form=form, categories=categories)
+    return render_template('add_item.html', form=form, categories=categories, user_id=user_id)
 
 # Delete Item
 @app.route('/delete_item/<string:id>', methods=['POST'])
@@ -404,13 +429,13 @@ def add_item():
 def delete_item(id):
 
     # Open DB Session
-    db_session = DBSession()
+    #db_session = DBSession()
     # Fetch Category from DB
-    delitem = db_session.query(Items).filter(Items.id==id).first()
+    delitem = db.session.query(Items).filter(Items.id==id).first()
     # Delete Item
-    db_session.delete(delitem)
+    db.session.delete(delitem)
     # Commit to DB
-    db_session.commit()
+    db.session.commit()
 
     flash('Item deleted', 'success')
 
@@ -422,10 +447,10 @@ def delete_item(id):
 def edit_item(id):
 
     # Creating DB Session
-    db_session = DBSession()
+    #db_session = DBSession()
 
-    item = db_session.query(Items).filter(Items.id == id).first()
-    categories = db_session.query(Categories)
+    item = db.session.query(Items).filter(Items.id == id).first()
+    categories = db.session.query(Categories)
 
     # Get Form
     form = ItemForm(request.form)
@@ -451,7 +476,7 @@ def edit_item(id):
         item.name = newname
         item.detail = newdetail
         # Commit to DB
-        db_session.commit()
+        db.session.commit()
 
         flash('Item updated', 'success')
 

@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+
 class Items(Base):
 
     __tablename__ = 'items'
@@ -14,7 +15,7 @@ class Items(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(250), nullable=False)
     detail = Column(String(500))
-    category = Column(Integer, ForeignKey('categories.id', ondelete="CASCADE"))
+    category = Column(Integer, ForeignKey('categories.id'))
     creation_time = Column(DateTime, default=datetime.datetime.now)
     modification_time = Column(DateTime, onupdate=datetime.datetime.now)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
@@ -34,8 +35,8 @@ class Categories(Base):
     __tablename__ = 'categories'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String(100), nullable=False)
-    child = relationship(Items, backref="parent", passive_deletes="all")
+    name = Column(String(100), nullable=False, unique=True)
+    items = relationship(Items, cascade="all, delete")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 
@@ -46,7 +47,7 @@ class Users(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
-    username = Column(String(30), nullable=False)
+    username = Column(String(30), nullable=False, unique=True)
     password = Column(String(100), nullable=False)
     register_date = Column(DateTime, default=datetime.datetime.now)
 

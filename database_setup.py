@@ -3,6 +3,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import create_engine
+from flask_dance.consumer.backend.sqla import OAuthConsumerMixin
 
 
 Base = declarative_base()
@@ -50,6 +51,11 @@ class Users(Base):
     username = Column(String(30), nullable=False, unique=True)
     password = Column(String(100), nullable=False)
     register_date = Column(DateTime, default=datetime.datetime.now)
+
+
+class OAuth(OAuthConsumerMixin, Base):
+    user_id = Column(Integer, ForeignKey(Users.id))
+    user = relationship(Users)
 
 engine = create_engine('sqlite:///flaskshop.db')
 Base.metadata.create_all(engine)

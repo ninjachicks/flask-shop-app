@@ -14,16 +14,23 @@ from flask_mysqldb import MySQL
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_dance.contrib.github import make_github_blueprint, github
+from flask_login import UserMixin, current_user, LoginManager, login_required, login_user, logout_user
+from flask_dance.consumer.backend.sqla import SQLAlchemyBackend
+from flask_dance.consumer import oauth_authorized
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.local import LocalProxy
+
+from environs import Env
 
 from wtforms import (Form, StringField, TextAreaField, 
     PasswordField, SelectField, validators)
 from wtforms_alchemy import ModelForm
 
-
-from database_setup import Categories, Items, Users, Base
+from database_setup import Categories, Items, Users, Base, OAuth
 
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.urandom(12)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskshop.db'
 
 
@@ -36,10 +43,37 @@ DBSession = sessionmaker(bind=engine)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+login_manager = LoginManager(app)
+current_user = LocalProxy(lambda: _get_user())
 
 
-github_blueprint = make_github_blueprint(client_id='0014280a3d68abcc37ac', client_secret='5e7a97cd939dbfe52fa929cf62d56664b08724a4', redirect_url='/')
+env = Env()
+env.read_env()  # read .env file, if it exists
+# required variables
+gh_client_id = env("GITHUB_ID")
+gh_client_secret = env("GITHUB_SECRET")  # => raises error if not set
+github_blueprint = make_github_blueprint(client_id=gh_client_id, client_secret=gh_client_secret)
 app.register_blueprint(github_blueprint, url_prefix='/github_login')
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+
+@app.route('/github')
+def github_login():
+    if not github.authorized:
+        return redirect(url_for('github.login'))
+
+    account_info = github.get('/user')
+
+    if account_info.ok:
+        account_info_json = account_info.json()
+
+        return '<h1>Your Github name is {}'.format(account_info_json['login'])
+
+    return '<h1>Request failed!</h1>'
 
 
 # Register Form Class
@@ -59,11 +93,7 @@ class LoginForm(Form):
     username = StringField('Username', [validators.Length(min=3, max=25)])
     password = PasswordField('Password', [validators.DataRequired()])
 
-def tmp():
-    return True
-# Category Form Class
-# class CategoryForm(Form):
-#     name = StringField('Name', [validators.Length(min=1, max=200)])
+
 class CategoryForm(ModelForm):
     def get_session():
         return db.session
@@ -84,7 +114,7 @@ class ItemForm(Form):
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' in session:
+        if 'logged_in' in session or current_user.is_authenticated:
             return f(*args, **kwargs)
         else:
             flash('Unauthorized, please log in', 'danger')
@@ -95,14 +125,11 @@ def is_logged_in(f):
 #JSON Catalog Endpoint
 @app.route('/catalog.json')
 def get_current_catalog():
-    # DBSession() instance
-    #db_session = DBSession()
     # Get current catalog
     catalog = db.session.query(Categories).all()
     results = {'Category': list()}
 
     for category in catalog:
-        #db_session = DBSession()
         items = db.session.query(Items).filter(Items.category == category.name).all()
         category_data = {
             'id': category.id,
@@ -117,9 +144,6 @@ def get_current_catalog():
 # JSON Catalog Item Endpoint
 @app.route('/<string:category>/<string:name>/JSON')
 def get_single_item(category, name):
-
-    # DBSession() instance
-    #db_session = DBSession()
 
     singleitem = db.session.query(Items).filter(Items.name == name)
 
@@ -160,13 +184,8 @@ def register():
         username = form.username.data
         password = sha256_crypt.encrypt(str(form.password.data))
 
-        # DBSession() instance
-        #db_session = DBSession()
-
-        #import pdb; pdb.set_trace()
         new_user = Users(name=name, email=email, username=username, password=password)
         db.session.add(new_user)
-        # commit to db
         db.session.commit()
 
         flash('You are now registered and can log in!', 'success')
@@ -185,9 +204,6 @@ def login():
         # Get Form Fields
         username = form.username.data
         password_post = form.password.data
-
-        # Creating DB Session
-        #db_session = DBSession()
 
         try:
             # Getting User Data
@@ -225,30 +241,25 @@ def login():
 
 
 # GitHub Login
-@app.route("/github")
-def github_login():
+# @app.route("/github")
+# def github_login():
 
-    if not github.authorized:
-        return redirect(url_for('github.login'))
-    account_info = github.get('/user')
+#     if not github.authorized:
+#         return redirect(url_for('github.login'))
+#     account_info = github.get('/user')
+#     print(account_info)
 
-@app.route("/itworks")
-def itworks():
-    return render_template('home.html')
+#     if account_info.ok:
+#         account_info_json = account_info.json()
+#         username = account_info_json['login']
+#         # Passed
+#         session['logged_in'] = True
+#         session['username'] = username
 
-    # if account_info.ok:
-    #     account_info_json = account_info.json()
-    #     username = account_info_json['login']
-    #     # Passed
-    #     session['logged_in'] = True
-    #     session['username'] = username
+#         flash('You are now logged in', 'success')
+        
 
-    #     flash('You are now logged in', 'success')
-    #     return redirect(url_for('home'))
-
-    # flash('Request failed', 'danger')
-
-    # return render_template('home.html')
+#     return render_template('home.html')
 
 
 # Catalog
@@ -485,5 +496,4 @@ def edit_item(id):
 
 
 if __name__ == "__main__":
-    app.secret_key = os.urandom(12)
     app.run(debug=True)

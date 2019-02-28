@@ -16,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_dance.contrib.github import make_github_blueprint, github
 from flask_login import UserMixin, current_user, LoginManager, login_required, login_user, logout_user
 from flask_dance.consumer.backend.sqla import SQLAlchemyBackend
+from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
 from flask_dance.consumer import oauth_authorized
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.local import LocalProxy
@@ -44,7 +45,6 @@ DBSession = sessionmaker(bind=engine)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
-current_user = LocalProxy(lambda: _get_user())
 
 
 env = Env()
@@ -52,8 +52,9 @@ env.read_env()  # read .env file, if it exists
 # required variables
 gh_client_id = env("GITHUB_ID")
 gh_client_secret = env("GITHUB_SECRET")  # => raises error if not set
-github_blueprint = make_github_blueprint(client_id=gh_client_id, client_secret=gh_client_secret)
-app.register_blueprint(github_blueprint, url_prefix='/github_login')
+github_blueprint = make_github_blueprint(client_id=gh_client_id, client_secret=gh_client_secret,
+    storage=SQLAlchemyStorage(OAuth, db.session, user=current_user))
+app.register_blueprint(github_blueprint, url_prefix='')
 
 
 @login_manager.user_loader
@@ -61,19 +62,32 @@ def load_user(user_id):
     return Users.query.get(int(user_id))
 
 
-@app.route('/github')
-def github_login():
+# GitHub Login
+@app.route("/github")
+@oauth_authorized.connect
+def github_login(blueprint, token=None):
+
+    if not token:
+        flash('No Token')
+
     if not github.authorized:
         return redirect(url_for('github.login'))
-
     account_info = github.get('/user')
+    
+    assert account_info.ok
 
     if account_info.ok:
         account_info_json = account_info.json()
+        username = account_info_json['login']
+        # Passed
+        session['logged_in'] = True
+        session['username'] = username
 
-        return '<h1>Your Github name is {}'.format(account_info_json['login'])
-
-    return '<h1>Request failed!</h1>'
+        flash('You are now logged in', 'success')
+    else:
+        flash('hello error')
+        
+    return render_template('home.html')
 
 
 # Register Form Class
@@ -230,44 +244,10 @@ def login():
         return render_template('login.html', form=form)
 
 
-# # GitHub Login
-# @app.route("/github")
-# def github_login():
-
-#     session['logged_in'] = True
-
-#     flash('You are now logged in', 'success')
-#     return redirect(url_for('home'))
-
-
-# GitHub Login
-# @app.route("/github")
-# def github_login():
-
-#     if not github.authorized:
-#         return redirect(url_for('github.login'))
-#     account_info = github.get('/user')
-#     print(account_info)
-
-#     if account_info.ok:
-#         account_info_json = account_info.json()
-#         username = account_info_json['login']
-#         # Passed
-#         session['logged_in'] = True
-#         session['username'] = username
-
-#         flash('You are now logged in', 'success')
-        
-
-#     return render_template('home.html')
-
-
 # Catalog
 @app.route("/catalog")
 def catalog():
     
-    # DBSession() instance
-    #db_session = DBSession()
     # get Username from session
     username = session.get('username')
 
@@ -285,9 +265,6 @@ def catalog():
 @app.route("/<string:name>")
 def category(name):
 
-    # DBSession() instance
-    #db_session = DBSession()
-
     catalog = db.session.query(Categories.name).filter(Categories.name == name)
 
     category = db.session.query(Items).filter(Items.category == name)
@@ -302,9 +279,6 @@ def category(name):
 # Single Item Page
 @app.route("/<string:category>/<string:name>/")
 def item(name, category):
-    
-    # DBSession() instance
-    #db_session = DBSession()
 
     singleitem = db.session.query(Items).filter(Items.name == name)
 
@@ -319,11 +293,7 @@ def add_category():
     form = CategoryForm(request.form)
     # get Username from session
     username = session.get('username')
-    # Open DB Session
-    #db_session = DBSession()
     # get user_id from DB
-    #user_id = db_session.query(Users.id).filter(Users.name == username).all()
-
     user = db.session.query(Users).filter(Users.username == username).first()
     user_id = user.id
 
@@ -331,8 +301,6 @@ def add_category():
 
         # Get Form Values
         name = form.name.data
-        # Open DB Session
-        #db_session = DBSession()
         # Insert into DB
         newcategory = Categories(name=name, user_id=user_id)
         db.session.add(newcategory, user_id)
@@ -353,8 +321,6 @@ def add_category():
 @is_logged_in
 def delete_cat(id):
 
-    # Open DB Session
-    #db_session = DBSession()
     # Fetch Category from DB
     result = db.session.query(Categories).filter(Categories.id == id).first()
     # Delete Category
@@ -372,8 +338,6 @@ def delete_cat(id):
 @is_logged_in
 def edit_cat(id):
 
-    # Creating DB Session
-    #db_session = DBSession()
     # Fetch Category from DB
     category = db.session.query(Categories).filter(Categories.id == id).first()
 
@@ -406,14 +370,11 @@ def add_item():
     form = ItemForm(request.form)
 
     username = session.get('username')
-    # DBSession() instance
-    #db_session = DBSession()
     # get categories for dropdown
     categories = db.session.query(Categories)
 
     user = db.session.query(Users).filter(Users.username == username).first()
     user_id = user.id
-    #form = ItemForm(request.POST, obj=categories)
     form.category.choices = [(c.name, c.name) for c in categories]
 
     if request.method == 'POST' and form.validate():
@@ -439,8 +400,6 @@ def add_item():
 @is_logged_in
 def delete_item(id):
 
-    # Open DB Session
-    #db_session = DBSession()
     # Fetch Category from DB
     delitem = db.session.query(Items).filter(Items.id==id).first()
     # Delete Item
@@ -456,9 +415,6 @@ def delete_item(id):
 @app.route('/edit_item/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
 def edit_item(id):
-
-    # Creating DB Session
-    #db_session = DBSession()
 
     item = db.session.query(Items).filter(Items.id == id).first()
     categories = db.session.query(Categories)
@@ -496,4 +452,5 @@ def edit_item(id):
 
 
 if __name__ == "__main__":
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     app.run(debug=True)

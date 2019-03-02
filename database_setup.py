@@ -49,8 +49,9 @@ class Users(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
     username = Column(String(30), nullable=False, unique=True)
-    password = Column(String(100), nullable=False)
+    password = Column(String(100), nullable=True)
     register_date = Column(DateTime, default=datetime.datetime.now)
+    github_id = Column(Integer, nullable=True, unique=True)
 
 
 class OAuth(OAuthConsumerMixin, Base):

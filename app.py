@@ -27,13 +27,13 @@ from wtforms import (Form, StringField, TextAreaField,
     PasswordField, SelectField, validators)
 from wtforms_alchemy import ModelForm
 
-from database_setup import Categories, Items, Users, Base, OAuth
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskshop.db'
 
+db = SQLAlchemy(app)
+from database_setup import Categories, Items, Users, Base, OAuth
 
 # Creating DB Engine
 engine = create_engine('sqlite:///flaskshop.db')
@@ -42,7 +42,6 @@ Base.metadata.bind = engine
 # Declaring sessionmaker
 DBSession = sessionmaker(bind=engine)
 
-db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 
@@ -74,18 +73,29 @@ def github_login(blueprint, token=None):
         return redirect(url_for('github.login'))
     account_info = github.get('/user')
     
-    assert account_info.ok
+    #assert account_info.ok
 
     if account_info.ok:
         account_info_json = account_info.json()
         username = account_info_json['login']
+        github_user_name = account_info_json['name']
+        github_user_email = account_info_json['email']
+        github_user_id = account_info_json['id']
+
+        github_db_user = db.session.query(Users).filter(Users.github_id == github_user_id).first()
+
+        if github_db_user is None:
+            new_github_user = Users(name=github_user_name, email=github_user_email, username=username, github_id=github_user_id)
+            db.session.add(new_github_user)
+            db.session.commit()
+
         # Passed
         session['logged_in'] = True
         session['username'] = username
 
         flash('You are now logged in', 'success')
     else:
-        flash('hello error')
+        flash('An error with your GitHub Login occured.')
         
     return render_template('home.html')
 

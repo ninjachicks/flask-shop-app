@@ -47,7 +47,6 @@ class Users(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False)
     username = Column(String(30), nullable=False, unique=True)
     password = Column(String(100), nullable=True)
     register_date = Column(DateTime, default=datetime.datetime.now)

@@ -72,20 +72,17 @@ def github_login(blueprint, token=None):
     if not github.authorized:
         return redirect(url_for('github.login'))
     account_info = github.get('/user')
-    
-    #assert account_info.ok
 
     if account_info.ok:
         account_info_json = account_info.json()
         username = account_info_json['login']
         github_user_name = account_info_json['name']
-        github_user_email = account_info_json['email']
         github_user_id = account_info_json['id']
 
         github_db_user = db.session.query(Users).filter(Users.github_id == github_user_id).first()
 
         if github_db_user is None:
-            new_github_user = Users(name=github_user_name, email=github_user_email, username=username, github_id=github_user_id)
+            new_github_user = Users(name=github_user_name, username=username, github_id=github_user_id)
             db.session.add(new_github_user)
             db.session.commit()
 
@@ -104,7 +101,6 @@ def github_login(blueprint, token=None):
 class RegisterForm(Form):
     name = StringField('Name', [validators.Length(min=1, max=50)])
     username = StringField('Username', [validators.Length(min=4, max=25)])
-    email = StringField('Email', [validators.Length(min=6, max=50)])
     password = PasswordField('Password', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')
@@ -201,20 +197,24 @@ def register():
 
     form = RegisterForm(request.form)
 
-    if request.method == 'POST' and form.validate():
-        # Populate Form Fields
-        name = form.name.data
-        email = form.email.data
-        username = form.username.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+    try:
+        if request.method == 'POST' and form.validate():
+            # Populate Form Fields
+            name = form.name.data
+            username = form.username.data
+            password = sha256_crypt.encrypt(str(form.password.data))
 
-        new_user = Users(name=name, email=email, username=username, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+            new_user = Users(name=name, username=username, password=password)
+            db.session.add(new_user)
+            db.session.commit()
 
-        flash('You are now registered and can log in!', 'success')
+            flash('You are now registered and can log in!', 'success')
 
-        return redirect(url_for('home'))
+            return redirect(url_for('home'))
+    except:
+        flash('Username already exists', 'danger')
+        return redirect(url_for('register'))
+
     return render_template('register.html', form=form)
 
 

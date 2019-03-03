@@ -37,7 +37,7 @@ class Categories(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
-    items = relationship(Items, cascade="all, delete")
+    items = relationship("Items", cascade="all, delete-orphan")
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 

@@ -115,12 +115,13 @@ class LoginForm(Form):
 
 
 class CategoryForm(ModelForm):
-    def get_session():
-        return db.session
+    name = StringField('Name', [validators.Length(min=1, max=200)])
+    # def get_session():
+    #     return db.session
 
-    class Meta:
-        model = Categories
-        only = ['name']
+    # class Meta:
+    #     model = Categories
+    #     only = ['name']
         
 
 # Item Form Class

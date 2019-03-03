@@ -5,6 +5,8 @@ instance/*
 
 ### DB 
 *.db
+### Env Variables
+.env
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files

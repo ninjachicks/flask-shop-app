@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 
+from database_setup import Categories, Items, Users, Base, OAuth
+
 import cgi
 import os
 import json
 from functools import wraps
 from passlib.hash import sha256_crypt
 
-from flask import (Flask, render_template, flash, redirect, 
-    url_for, session, logging, request, jsonify)
+from flask import (Flask, render_template, flash, redirect,
+                   url_for, session, logging, request, jsonify)
 from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
 from flask_mysqldb import MySQL
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_dance.contrib.github import make_github_blueprint, github
-from flask_login import UserMixin, current_user, LoginManager, login_required, login_user, logout_user
+from flask_login import (UserMixin, current_user, LoginManager,
+                         login_required, login_user, logout_user)
 from flask_dance.consumer.backend.sqla import SQLAlchemyBackend
 from flask_dance.consumer.storage.sqla import SQLAlchemyStorage
 from flask_dance.consumer import oauth_authorized
@@ -23,8 +26,8 @@ from werkzeug.local import LocalProxy
 
 from environs import Env
 
-from wtforms import (Form, StringField, TextAreaField, 
-    PasswordField, SelectField, validators)
+from wtforms import (Form, StringField, TextAreaField,
+                     PasswordField, SelectField, validators)
 from wtforms_alchemy import ModelForm
 
 
@@ -33,7 +36,6 @@ app.config['SECRET_KEY'] = os.urandom(12)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskshop.db'
 
 db = SQLAlchemy(app)
-from database_setup import Categories, Items, Users, Base, OAuth
 
 # Creating DB Engine
 engine = create_engine('sqlite:///flaskshop.db')
@@ -51,8 +53,11 @@ env.read_env()  # read .env file, if it exists
 # required variables
 gh_client_id = env("GITHUB_ID")
 gh_client_secret = env("GITHUB_SECRET")  # => raises error if not set
-github_blueprint = make_github_blueprint(client_id=gh_client_id, client_secret=gh_client_secret,
-    storage=SQLAlchemyStorage(OAuth, db.session, user=current_user))
+github_blueprint = make_github_blueprint(client_id=gh_client_id,
+                                         client_secret=gh_client_secret,
+                                         storage=SQLAlchemyStorage(OAuth,
+                                                                   db.session,
+                                                                   user=current_user))
 app.register_blueprint(github_blueprint, url_prefix='')
 
 
@@ -82,7 +87,9 @@ def github_login(blueprint, token=None):
         github_db_user = db.session.query(Users).filter(Users.github_id == github_user_id).first()
 
         if github_db_user is None:
-            new_github_user = Users(name=github_user_name, username=username, github_id=github_user_id)
+            new_github_user = Users(name=github_user_name,
+                                    username=username,
+                                    github_id=github_user_id)
             db.session.add(new_github_user)
             db.session.commit()
 
@@ -93,7 +100,7 @@ def github_login(blueprint, token=None):
         flash('You are now logged in', 'success')
     else:
         flash('An error with your GitHub Login occured.')
-        
+
     return render_template('home.html')
 
 
@@ -115,14 +122,14 @@ class LoginForm(Form):
 
 
 class CategoryForm(ModelForm):
-    name = StringField('Name', [validators.Length(min=1, max=200)])
-    # def get_session():
-    #     return db.session
+    #name = StringField('Name', [validators.Length(min=1, max=200)])
+    def get_session():
+        return db.session
 
-    # class Meta:
-    #     model = Categories
-    #     only = ['name']
-        
+    class Meta:
+        model = Categories
+        only = ['name']
+
 
 # Item Form Class
 class ItemForm(Form):
@@ -143,7 +150,7 @@ def is_logged_in(f):
     return wrap
 
 
-#JSON Catalog Endpoint
+# JSON Catalog Endpoint
 @app.route('/catalog.json')
 def get_current_catalog():
     # Get current catalog
@@ -158,7 +165,7 @@ def get_current_catalog():
             'items': [item.serialize for item in items]
         }
         results['Category'].append(category_data)
-    
+
     return jsonify(results)
 
 
@@ -250,7 +257,7 @@ def login():
         except:
             error = 'Invalid login'
             return render_template('login.html', error=error, form=form)
-    
+
     else:
         return render_template('login.html', form=form)
 
@@ -258,18 +265,19 @@ def login():
 # Catalog
 @app.route("/catalog")
 def catalog():
-    
+
     # get Username from session
     username = session.get('username')
 
     catalog = db.session.query(Categories).order_by(Categories.name)
-    
+
     latestitems = db.session.query(Items).order_by(Items.creation_time.desc()).limit(10)
 
     user_id = db.session.query(Users.id).filter(Users.username == username).scalar()
 
     # returns 2 variables for template 'catalog
-    return render_template('catalog.html', catalog=catalog, latestitems=latestitems, user_id=user_id)
+    return render_template('catalog.html', catalog=catalog,
+                           latestitems=latestitems, user_id=user_id)
 
 
 # Single Category
@@ -283,8 +291,8 @@ def category(name):
     countitems = db.session.query(Items).filter(Items.category == name).count()
 
     # returns 2 variables for template 'categories
-    return render_template('category.html', category=category, catalog=catalog, 
-        countitems=countitems)
+    return render_template('category.html', category=category,
+                           catalog=catalog, countitems=countitems)
 
 
 # Single Item Page
@@ -323,6 +331,7 @@ def add_category():
         return redirect(url_for('catalog'))
     else:
         flash(str(form.errors))
+    
 
     return render_template('add_category.html', form=form)
 
@@ -394,7 +403,10 @@ def add_item():
         detail = form.detail.data
         category = form.category.data
 
-        newitem = Items(name=name, detail=detail, category=category, user_id=user_id)
+        newitem = Items(name=name,
+                        detail=detail,
+                        category=category,
+                        user_id=user_id)
         db.session.add(newitem)
 
         # Commit to DB
@@ -404,7 +416,9 @@ def add_item():
 
         return redirect(url_for('catalog'))
 
-    return render_template('add_item.html', form=form, categories=categories, user_id=user_id)
+    return render_template('add_item.html', form=form, categories=categories,
+                           user_id=user_id)
+
 
 # Delete Item
 @app.route('/delete_item/<string:id>', methods=['POST'])
@@ -412,7 +426,7 @@ def add_item():
 def delete_item(id):
 
     # Fetch Category from DB
-    delitem = db.session.query(Items).filter(Items.id==id).first()
+    delitem = db.session.query(Items).filter(Items.id == id).first()
     # Delete Item
     db.session.delete(delitem)
     # Commit to DB
@@ -421,6 +435,7 @@ def delete_item(id):
     flash('Item deleted', 'success')
 
     return redirect(url_for('catalog'))
+
 
 # Edit Item
 @app.route('/edit_item/<string:id>', methods=['GET', 'POST'])

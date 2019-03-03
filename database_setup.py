@@ -57,5 +57,6 @@ class OAuth(OAuthConsumerMixin, Base):
     user_id = Column(Integer, ForeignKey(Users.id))
     user = relationship(Users)
 
+
 engine = create_engine('sqlite:///flaskshop.db')
 Base.metadata.create_all(engine)

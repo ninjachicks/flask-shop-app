@@ -53,11 +53,9 @@ env.read_env()  # read .env file, if it exists
 # required variables
 gh_client_id = env("GITHUB_ID")
 gh_client_secret = env("GITHUB_SECRET")  # => raises error if not set
+storage = SQLAlchemyStorage(OAuth, db.session, user=current_user)
 github_blueprint = make_github_blueprint(client_id=gh_client_id,
-                                         client_secret=gh_client_secret,
-                                         storage=SQLAlchemyStorage(OAuth,
-                                                                   db.session,
-                                                                   user=current_user))
+                                         client_secret=gh_client_secret)
 app.register_blueprint(github_blueprint, url_prefix='')
 
 
@@ -84,7 +82,9 @@ def github_login(blueprint, token=None):
         github_user_name = account_info_json['name']
         github_user_id = account_info_json['id']
 
-        github_db_user = db.session.query(Users).filter(Users.github_id == github_user_id).first()
+        github_db_user = db.session.query(Users) \
+            .filter(Users.github_id == github_user_id) \
+            .first()
 
         if github_db_user is None:
             new_github_user = Users(name=github_user_name,
@@ -122,7 +122,6 @@ class LoginForm(Form):
 
 
 class CategoryForm(ModelForm):
-    #name = StringField('Name', [validators.Length(min=1, max=200)])
     def get_session():
         return db.session
 
@@ -158,7 +157,8 @@ def get_current_catalog():
     results = {'Category': list()}
 
     for category in catalog:
-        items = db.session.query(Items).filter(Items.category == category.name).all()
+        items = db.session.query(Items) \
+            .filter(Items.category == category.name).all()
         category_data = {
             'id': category.id,
             'name': category.name,
@@ -239,10 +239,12 @@ def login():
 
         try:
             # Getting User Data
-            user = db.session.query(Users).filter(Users.username == username).first()
+            user = db.session.query(Users) \
+                .filter(Users.username == username).first()
 
             # Password Verification
-            if sha256_crypt.verify(password_post, user.password) and username == user.username:
+            if sha256_crypt.verify(password_post, user.password) \
+                    and username == user.username:
                 # Passed
                 session['logged_in'] = True
                 session['username'] = username
@@ -271,9 +273,11 @@ def catalog():
 
     catalog = db.session.query(Categories).order_by(Categories.name)
 
-    latestitems = db.session.query(Items).order_by(Items.creation_time.desc()).limit(10)
+    latestitems = db.session.query(Items) \
+        .order_by(Items.creation_time.desc()).limit(10)
 
-    user_id = db.session.query(Users.id).filter(Users.username == username).scalar()
+    user_id = db.session.query(Users.id) \
+        .filter(Users.username == username).scalar()
 
     # returns 2 variables for template 'catalog
     return render_template('catalog.html', catalog=catalog,
@@ -329,9 +333,6 @@ def add_category():
         flash('Category created', 'success')
 
         return redirect(url_for('catalog'))
-    else:
-        flash(str(form.errors))
-    
 
     return render_template('add_category.html', form=form)
 

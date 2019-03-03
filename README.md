@@ -19,7 +19,11 @@ flaskshop.db consists of 4 tables:
 * users
 * oauth
 
-The tables categories and items are connected via a Foreign Key (items.category = categories.id).
+The tables categories and items are connected via Foreign Keys: 
+* `items.category = categories.id`
+* `items.user_id = users.id`
+* `categories.user_id = users.id`
+* `oauth.user_id = users.id`
 
 # Installation/Environment
 

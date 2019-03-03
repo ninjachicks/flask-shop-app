@@ -12,11 +12,12 @@ To test the program you can download a sample database here with this repository
 
 [flaskshop.db](https://github.com/CarolinB/flask-shop-app/blob/master/flaskshop.db)
 
-flaskshop.db consists of 3 tables:
+flaskshop.db consists of 4 tables:
 
 * categories
 * items
 * users
+* oauth
 
 The tables categories and items are connected via a Foreign Key (items.category = categories.id).
 
@@ -58,6 +59,29 @@ Then follow the following steps using your terminal:
 [Official Flask Installation Guide](http://flask.pocoo.org/docs/1.0/installation/)
 
 * `pip3 install Flask`
+
+Furthermore you will need the following packages:
+```
+flask_migrate
+flask_login
+flask_dance
+passlib
+sqlalchemy
+sqlalchemy_utils
+environs
+wtforms
+wtforms_alchemy
+blinker
+flask_script
+```
+## GitHub Login
+To use the GitHub Login functionality 
+* create a [GitHub](https://github.com/) account
+* add the app [here](https://github.com/settings/applications/new)
+If you got any problems follow this [tutorial](https://developer.github.com/apps/building-github-apps/creating-a-github-app/).
+In your app folder create a .env file and add the following two variables there:
+* `GITHUB_ID`=mygithubid
+* `GITHUB_SECRET`=mygithubsecret
 
 ## Run the program
 

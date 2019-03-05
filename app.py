@@ -33,12 +33,14 @@ from wtforms_alchemy import ModelForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(12)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flaskshop.db'
+project_dir = os.path.dirname(os.path.abspath(__file__))
+database_file = "sqlite:///{}".format(os.path.join(project_dir, "flaskshop.db"))
+app.config['SQLALCHEMY_DATABASE_URI'] = database_file
 
 db = SQLAlchemy(app)
 
 # Creating DB Engine
-engine = create_engine('sqlite:///flaskshop.db')
+engine = create_engine(database_file)
 # Bind the engine to the metadata of the Base class
 Base.metadata.bind = engine
 # Declaring sessionmaker

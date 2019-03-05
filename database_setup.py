@@ -1,3 +1,4 @@
+import os.path
 import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -58,5 +59,8 @@ class OAuth(OAuthConsumerMixin, Base):
     user = relationship(Users)
 
 
-engine = create_engine('sqlite:///flaskshop.db')
+project_dir = os.path.dirname(os.path.abspath(__file__))
+database_file = "sqlite:///{}".format(os.path.join(project_dir, "flaskshop.db"))
+
+engine = create_engine(database_file)
 Base.metadata.create_all(engine)

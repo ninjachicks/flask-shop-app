@@ -12,7 +12,6 @@ from flask import (Flask, render_template, flash, redirect,
                    url_for, session, logging, request, jsonify)
 from sqlalchemy import create_engine, insert, delete, update
 from sqlalchemy.orm import sessionmaker
-from flask_mysqldb import MySQL
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_dance.contrib.github import make_github_blueprint, github

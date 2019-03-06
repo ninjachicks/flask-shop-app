@@ -99,6 +99,35 @@ In your app folder create a .env file and add the following two variables there:
 
 [Screenshot of adding an item](https://github.com/CarolinB/flask-shop-app/issues/3#issue-407721167)
 
+# Server Details
+* IP Address 89.22.107.197
+* OPS Ubuntu 16.04
+* SSH Port 2200
+* URL to application: [http://89.22.107.197](http://89.22.107.197)
+
+## Installation log on server
+* `apt-get install nano`
+* `apt-get install git`
+* `apt-get install python3-pip`
+* `apt-get install libapache2-mod-wsgi-py3`
+
+## Configuration changes
+changed port ssh from 22 to 2200
+
+## pip3 packages
+* Flask
+* flask_migrate
+* flask_login
+* flask_dance
+* passlib
+* sqlalchemy
+* sqlalchemy_utils
+* environs
+* wtforms
+* wtforms_alchemy
+* blinker
+* flask_script
+
 # Licence
 
 No licence required.

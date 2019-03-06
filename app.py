@@ -404,10 +404,12 @@ def add_item():
         name = form.name.data
         detail = form.detail.data
         category = form.category.data
+        selected_category_id = categories.filter(Categories.name == category).first().id
 
         newitem = Items(name=name,
                         detail=detail,
                         category=category,
+                        category_id = selected_category_id,
                         user_id=user_id)
         db.session.add(newitem)
 

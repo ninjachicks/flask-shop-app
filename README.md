@@ -112,7 +112,25 @@ In your app folder create a .env file and add the following two variables there:
 * `apt-get install libapache2-mod-wsgi-py3`
 
 ## Configuration changes
-changed port ssh from 22 to 2200
+* in `etc/ssh/sshd_config`changed port ssh from 22 to 2200
+* installed `ufw`and made the following changes:
+** `ufw default allow outgoing`
+** `ufw default deny incoming`
+** `ufw allow ssh`
+** `ufw allow 2200`
+** `ufw allow www`
+** `ufw enable`
+* added WSGIScriptAlias to apache2 conf-enabled:
+** new file flaskapp.conf
+```
+WSGIScriptAlias / /usr/share/caros-apps/flaskapp/wsgi/flask.wsgi
+WSGIScriptReloading On
+
+<Directory /usr/share/caros-apps/flaskapp/wsgi>
+  Order allow,deny
+  Allow from all
+</Directory>
+``` 
 
 ## pip3 packages
 * Flask

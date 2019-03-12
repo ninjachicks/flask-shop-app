@@ -121,8 +121,8 @@ In your app folder create a .env file and add the following two variables there:
   * `ufw allow www`
   * `ufw enable`
 * added WSGIScriptAlias to apache2 conf-enabled:
-  * new file flaskapp.conf
-  * ```
+  * new file flaskapp.conf with following content:
+```
 WSGIScriptAlias / /usr/share/caros-apps/flaskapp/wsgi/flask.wsgi
 WSGIScriptReloading On
 

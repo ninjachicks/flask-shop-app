@@ -146,6 +146,13 @@ WSGIScriptReloading On
 * blinker
 * flask_script
 
+## Third party resources
+* passlib
+* wtforms
+* environs
+* blinker
+* sqlalchemy
+
 # Licence
 
 No licence required.
